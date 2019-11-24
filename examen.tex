@@ -31,6 +31,7 @@
 \newcommand{\tb}[1]{\textcolor{RoyalPurple} {\textbf{#1}}}
 \newcommand{\ti}[1]{\textcolor{RoyalPurple} {\textit{#1}}}
 \newcommand{\pt}[1]{\textcolor{RoyalPurple}{(#1pt)}}
+\newcommand{\tvec}[1]{$\vec{\tx{#1}}$ }
 
 % header
 \title {
@@ -255,16 +256,16 @@
 
         También se puede usar la constantee de error en cualquier método.
 
-        \item \tb{\pt{hasta 2} Privacidad en \tx{Java Peso Pluma}}
+        \item \tb{Extra \pt{hasta 2}: Privacidad en \tx{Java Peso Pluma}}
 
         \tx{Java} proporciona mecanismos para controlar el accesso. Un método o
-        atributo de una clase pueden declararse como \ti{public, protegido o 
+        atributo de una clase pueden declararse como \ti{público, protegido o 
         privado}. En \tx{Java Peso Pluma} es posible agregar este mecanismo como
         sigue
 
         \begin{minted}[escapeinside=<>]{java}
-            C ::= class C extends C {<{$\vec{p}\vec{C}\vec{f}$}>;K <$\vec{M}$>} // declaración de clases
-            M ::= p C m (<$\vec{C} \vec{x}$>) {return e;} // declaración de métodos
+            C ::= class C extends C {<\tvec{p}\tvec{C}\tvec{f}>;K <\tvec{M}>} // declaración de clases
+            M ::= p C m (<\tvec{C} \tvec{x}>) {return e;} // declaración de métodos
             p ::= public | protected | private // modificacor de privacidad
         \end{minted}
 
