@@ -1,0 +1,300 @@
+% type 
+\documentclass{article}
+
+% page format
+\usepackage[letterpaper, margin=1.5cm]{geometry}
+
+% font
+\renewcommand{\familydefault}{\sfdefault}
+
+% colors
+\usepackage[dvipsnames]{xcolor}
+
+% enumeration format
+\usepackage{enumitem}
+\setlist[enumerate,1]{label=\textcolor{RoyalPurple}{\arabic*.}}
+\setlist[enumerate,2]{label=\textcolor{RoyalPurple}{\alph*)}}
+\setlist[itemize,1]{label=\color{RoyalPurple}{$\bullet$}}
+
+% language
+\usepackage[spanish]{babel}
+
+% math symbols
+\usepackage{amssymb}
+
+% code
+\usepackage{minted}
+\usemintedstyle{manni}
+
+% shortcuts
+\newcommand{\tx}[1]{\textcolor{CadetBlue} {\texttt{#1}}}
+\newcommand{\tb}[1]{\textcolor{RoyalPurple} {\textbf{#1}}}
+\newcommand{\ti}[1]{\textcolor{RoyalPurple} {\textit{#1}}}
+\newcommand{\pt}[1]{\textcolor{RoyalPurple}{(#1pt)}}
+
+% header
+\title {
+    \color{RoyalPurple}
+    Lenguajes de Programación 2020-1\\
+    Facultad de Ciencias UNAM\\
+    Tarea Examen Parcial 4
+}
+
+\author{
+    Sandra del Mar Soto Corderi \quad Edgar Quiroz Castañeda
+}
+
+\date{
+    Fecha de entrega: 2 de diciembre de 2019
+}
+
+% document
+\begin{document}
+    % header
+    \maketitle
+
+    \tb{Esta tarea vale 8 puntos sobre el parcial 4, la calificación se 
+    completa con una pregunta presencial el 29 de noviembre de 2019}
+
+    \begin{enumerate}
+        \item \pt{1} Se desea implementar una función \tx{ct} que reciba un 
+        árbol heterogéneo de naturales o booleanos y devuelva la conjunción de 
+        sus elementos siempre y cuando todos sean booleanos y en otro caso 
+        devuelva el valor \tx{n+1}, donde \tx{n} es el primer natural encontrado en el
+        árbol. Para este propósito defina una función \tx{ctaux} y una expresión
+        \tx{e} tal que la función \tx{ct} quede implementada como
+        
+        \begin{minted}{haskell}
+            ct t = handle ctaux y with x => e
+        \end{minted}
+
+        Bosqueje la evaluación de la expresión
+
+        \begin{minted}{haskell}
+            Node (iszero 9) (Node False Void Void) (Node 5 Void Void)
+        \end{minted}
+
+        en la máquina \tx{$\mathcal{K}$}.
+
+        Puede omitir varios pasos pero no los que involucren el manejo de 
+        excepciones.
+
+        \ti{Sugerencia:} Es más fácil si define \tx{ctaux} a partir de una
+        función binaria \tx{vand} que realice la conjunción si sus argumentos
+        son booleanos y en caso contrario lance una excepción adecuada de forma
+        que sea manejada por \tx{e}. Puede suponer que existe una función unaria 
+        \tx{isbool} que verifica si su argumento es o no un booleano.
+
+        \item \pt{1} Considere el siguiente programa, donde suponemos que el 
+        lenguaje contiene un operador primitivo \tx{not} para la negación 
+        booleana.
+
+        \begin{minted}{haskell}
+            not letcc k2 in
+                iszero(2 + letcc k1 in)
+                    3  + if x = pred 8 then 
+                        4 * pred (continue k2 6) 
+                        else 5 * suc (continue k1 false)
+                    end
+                    )
+                end
+            end
+        \end{minted}
+        \begin{enumerate}
+            \item ¿Cuáles son los tipos de \tx{k1} y \tx{k2}?
+            \item ¿A qué continuaciones se ligan las variables \tx{k1} y 
+            \tx{k2}?
+            \item ¿A qué se evalua el programa para \tx{x = 7} y para 
+            \tx{x $\neq$ 7}?
+        \end{enumerate}
+
+        \item \pt{1.5} Considere la siguiente función \tx{N} que depende de
+        ciertas funciones dadas \tx{f, g, h}.
+
+        \begin{minted}{haskell}
+            N 0 = 17
+
+            N 1 = f (1 + 13)
+
+            N 2 = 22 + (2-3) + 2
+
+            N 3 = 22 + (f 3) + 37
+
+            N 4 = g 22 (f 4)
+
+            N 4 = 22 + (f 4) + 33 + (g y)
+
+            N x = h (f x) (44 - y) (g y)
+        \end{minted}
+
+        Defina la versión \tx{cps} de \tx{N}, denotada por \tx{cpsN}. Para esto,
+        puede suponer definidas las versiones \tx{cps} de \tx{f, g, h},
+        denotadas por \tx{cpsf, cpsg, cpsh}.
+
+        \ti{Atención:} Las operaciones aritméticas deben permanecer sin cambios.
+        Es decir, no se piden las versiones \tx{cps} de \tx{+, -}.
+
+        \item \pt{1.5} Considere las siguientes cuatro caracterísiticas para un 
+        lenguaje de programación.
+
+        \begin{enumerate}
+            \item Existe un tipo de cadena \tx{String} y se cumple 
+            \tx{Int $\leq$ String} mediante una conversión implícita que 
+            transforma a un entero en una cadena. 
+
+            Por ejemplo, \tx{123} a \tx{"123"}.
+
+            \item Existe un tipo cadena \tx{String} que cumple que 
+            \tx{String $\leq$ Int} mediante una conversión implícita que 
+            transforma cadenas a enteros ignorado los caractéres que no sean
+            dígitos, excepto por el caracter inicial \tx{-}.
+
+            Por ejemplo, \tx{"}\tx{-0aw23r4"} corresponde a \tx{-234}.
+
+            \item Existe un operador binario \tx{+} que denota a ambas la suma 
+            de enteros y la concatenación de cadenas.
+
+            \item Existe un operador binario \tx{=} que denota a ambas la 
+            igualdad de enteros y de cadenas.
+        \end{enumerate}
+
+        Para cada par de estas caracterísiticas, discuta si se violan o no los 
+        principios fundamentales del subtipado. En caso afirmativo escriba un
+        ejemplo de un programa simple que cause un comprotamiento ambigüo o 
+        contrainituitivo.
+
+        \item \pt{1} Usando la definición de números naturales en 
+        \tx{Java Peso Pluma} vista en clase.
+
+        \begin{enumerate}
+            \item Agregue un método \tx{pot} y \tx{leq} para las operaciones de
+            potencia y el orden \tx{$\leq$}.
+
+            \item Modele la clase \tx{Boolean} para el manejo de valores
+            booleanos
+            \begin{itemize}
+                \item La clase debe extender de \tx{Object}
+
+                \item El constructor recibirá un objeto de la clase \tx{Nat}
+                para definir su valor. \tx{0} representa \tx{true} y \tx{1}
+                representa \tx{true}.
+
+                \item Debe tener métodos \tx{true} y \tx{false} que regresen una
+                instancia de \tx{Boolean} según el caso.
+            \end{itemize} 
+        \end{enumerate}
+        
+        \item \pt{2} Definina el siguiente lenguaje \tx{MinEAB}
+
+        \begin{minted}{haskell}
+            e ::= n | true | false | e + e | e < e
+        \end{minted}
+
+        en \tx{Java Peso Pluma}.
+
+        Hay que seguir los siguientes pasos
+
+        \begin{enumerate}
+            \item Defina una clase \tx{Expr} que incluya los siguientes métodos
+
+            \begin{itemize}
+                \item \tx{isAtom} que devuelve \tx{true} si la expresión no
+                tiene subexpresiones propias.
+
+                \item \tx{lsub} que devuelve la subexpresión izquierda de una
+                expresión no atómica.
+
+                \item \tx{rsub} que devuelve la subexpresión derecah de una
+                expresión no atómica.
+
+                \item \tx{eval} que devuelve el valor de la expresión.
+            \end{itemize}
+
+            Esta clase debe ser abstracta en el sentido de que no tiene 
+            atributos y por lo tanto sus métodos no tiene cuerpo. Es una 
+            interfaz.
+
+            \item Defina las siguientes clases que implemente a \tx{Expr}
+            
+            \begin{itemize}
+                \item \tx{NumExpr} que implemente los métodos para manejar 
+                números.
+
+                \item \tx{BoolExpr} que implemente los métodos para manejar 
+                booleanos.
+
+                \item \tx{SumExpr} que implemente los métodos para manejar 
+                sumas.
+
+                \item \tx{LTExpr} que implemente los métodos para manejar 
+                comparaciones de orden.
+            \end{itemize}
+
+            \item Dé ejemplos de instancias de cada una de las clases 
+            anteriores.
+
+            \item Extienda \tx{MinEAB} con las expresiones \tx{-e, iszero e}.
+
+            Con esta nueva definición, cree las siguientes clases
+
+            \begin{itemize}
+                \item \tx{NegExpr}
+                \item \tx{IsZero}
+            \end{itemize}
+
+            \item Dé ejemplos de instancias de estas dos clases.
+
+            \item ¿Cómo se modifican las subclases de \tx{Expr} definidas en
+            puntos anteriores?
+        \end{enumerate}
+
+        Puede suponer definida la clase \tx{Value} (escencialmente 
+        \tx{Nat + Bool}) cuyas instancias sean los valores del lenguaje.
+
+        Además de otras clases primitivas con los métodos que requiera.
+
+        También se puede usar la constantee de error en cualquier método.
+
+        \item \tb{\pt{hasta 2} Privacidad en \tx{Java Peso Pluma}}
+
+        \tx{Java} proporciona mecanismos para controlar el accesso. Un método o
+        atributo de una clase pueden declararse como \ti{public, protegido o 
+        privado}. En \tx{Java Peso Pluma} es posible agregar este mecanismo como
+        sigue
+
+        \begin{minted}[escapeinside=||]{haskell}
+            C ::= class C extends C {|{$\vec{p}\vec{C}\vec{f}$}|;K|$\vec{M}$|} -- declaración de clases
+            M ::= p C m (|$\vec{C} \vec{x}$|) {return e;} -- declaración de métodos
+            p ::= public | protected | private -- modificacor de privacidad
+        \end{minted}
+
+        EL significado intuitivo de los modificadores de privacidad es el 
+        siguiente:
+
+        \begin{itemize}
+            \item Si un método o atributo de una clase \tx{C} se declara 
+            \tx{public}, entonces se permite el acceso desde cualquier lugar.
+
+            \item Si un método o atributo de una clase \tx{C} se declara 
+            \tx{protected}, entonces se permite el acceso únicamente desde
+            métodos de \tx{C} y subclases de \tx{C}.
+
+            \item Si un método o atributo de una clase \tx{C} se declara 
+            \tx{private}, entonces se permite el acceso únicamente desde
+            métodos de \tx{C}.
+        \end{itemize}
+
+        Extienda la semática estática para filtrar programas que contengan 
+        violaciones de privacidad de acuerdo a las reglas dadas arriba. 
+        Especifique claramente cuales reglas de tipado originales se eliminan o 
+        se sustituyen por nuevas y cuáles se mantienen.
+
+        \ti{Sugerencia:} Cuando se verifique si un método está bien formado en 
+        una clase \tx{C}, se debe verificar si la expresión en el cuerpo del 
+        método no se reifere a métodos o atributos en otra clase \tx{D} que sean
+        privados o protegidos si \tx{C $\not \leq$ D}. Podría necesitarse el 
+        paso de algo más en el contexto \tx{$\Gamma$} en el juicio de tipado 
+        para expresiones.
+
+    \end{enumerate}
+\end{document}
