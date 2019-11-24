@@ -262,10 +262,10 @@
         privado}. En \tx{Java Peso Pluma} es posible agregar este mecanismo como
         sigue
 
-        \begin{minted}[escapeinside=||]{haskell}
-            C ::= class C extends C {|{$\vec{p}\vec{C}\vec{f}$}|;K|$\vec{M}$|} -- declaración de clases
-            M ::= p C m (|$\vec{C} \vec{x}$|) {return e;} -- declaración de métodos
-            p ::= public | protected | private -- modificacor de privacidad
+        \begin{minted}[escapeinside=<>]{java}
+            C ::= class C extends C {<{$\vec{p}\vec{C}\vec{f}$}>;K <$\vec{M}$>} // declaración de clases
+            M ::= p C m (<$\vec{C} \vec{x}$>) {return e;} // declaración de métodos
+            p ::= public | protected | private // modificacor de privacidad
         \end{minted}
 
         EL significado intuitivo de los modificadores de privacidad es el 
