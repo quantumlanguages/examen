@@ -21,6 +21,7 @@
 
 % math symbols
 \usepackage{amssymb}
+\usepackage{amsmath}
 
 % code
 \usepackage{minted}
@@ -32,6 +33,13 @@
 \newcommand{\ti}[1]{\textcolor{RoyalPurple} {\textit{#1}}}
 \newcommand{\pt}[1]{\textcolor{RoyalPurple}{(#1pt)}}
 \newcommand{\tvec}[1]{$\vec{\tx{#1}}$ }
+\newcommand{\es}{$\square$}
+\newcommand{\pop}[2]{ \tx{#1} \succ \tx{#2}}
+\newcommand{\push}[2]{ \tx{#1} \prec \tx{#2}}
+\newcommand{\kr}{\rightarrow_{\mathcal{K}} \quad}
+\newcommand{\br}{\rightarrow_{\beta} \quad}
+\newcommand{\krs}{\rightarrow_{\mathcal{K}}^{\star} \quad}
+
 
 % header
 \title {
@@ -66,7 +74,7 @@
         \tx{e} tal que la función \tx{ct} quede implementada como
         
         \begin{minted}{haskell}
-            ct t = handle ctaux y with x => e
+            ct t = handle ctaux t with x => e
         \end{minted}
 
         Bosqueje la evaluación de la expresión
@@ -86,6 +94,54 @@
         que sea manejada por \tx{e}. Puede suponer que existe una función unaria 
         \tx{isbool} que verifica si su argumento es o no un booleano.
 
+        \tb{Solución:}
+
+        Definiendo \tx{vand}.
+
+        \begin{minted}{haskell}
+            -- Función auxiliar para mandar expeciones
+            bool_panic p = if isbool then p else raise(p)
+
+            -- Realiza la conjunción si sus argumentos son booleanos o lanza una
+            -- excepción con el primer argumeto que no lo sea.
+            vand p q = and (bool_panic p) (bool_panic q)
+        \end{minted}
+
+        Ahora, hay que usar esta función para definir \tx{ctaux}.
+
+        \begin{minted}{haskell}
+            ctaux Void = True
+            ctaux (Node r i d) = vand r (vand (ctaux i) (ctaux d))
+        \end{minted}
+
+        Y usando esto, se define \tx{ct} como 
+
+        \begin{minted}{haskell}
+            ct t = handle ctaux t with x => x + 1
+        \end{minted}
+
+        Ahora, para evaluar la expresión, es útil definir lo siguiente
+
+            
+        \begin{align*}
+            &\tx{a = Node (iszero 9) (Node False Void Void) (Node 5 Void Void)} \\
+            &\tx{r = iszero 9}\\
+            &\tx{i = Node False Void Void}\\
+            &\tx{d = Node 5 Void Void}
+        \end{align*}
+
+        Ahora, para evaluar
+
+        \begin{align*}
+            &\pop{\es}{ct a} \\
+            &\br \pop{\es}{handle (ctaux a) with x => x + 1}\\
+            &\kr \pop{handle(-, x.x+1)}{ctaux a}\\
+            &\br \pop{handle(-, x.x+1)}{and (bool-panic r) (vand (ctaux i) (ctaux d))}\\
+            &\krs \pop{and(False, -), handle(-, x.x+1)}{vand (ctaux i) (ctaux d)}\\
+            &\krs \pop{and(False, -), and(False, -), handle(-, x.x+1)}{bool-panic(ctaux d)}\\
+            &\krs \pop{isbool(-), if(-, ctaux d, raise(ctaux d))}{ctaux d}
+        \end{align*}
+
         \item \pt{1} Considere el siguiente programa, donde suponemos que el 
         lenguaje contiene un operador primitivo \tx{not} para la negación 
         booleana.
@@ -103,10 +159,24 @@
         \end{minted}
         \begin{enumerate}
             \item ¿Cuáles son los tipos de \tx{k1} y \tx{k2}?
+
+            \[
+                \tx{k1 : Cont(Integer)} \quad \tx{k2 : Cont(Bool)}
+            \]
+
             \item ¿A qué continuaciones se ligan las variables \tx{k1} y 
             \tx{k2}?
+
+            \[
+                \tx{k1 --> (continue k1 6)} \quad \tx{k2 --> (continue k2 False)}
+            \]
+
             \item ¿A qué se evalua el programa para \tx{x = 7} y para 
             \tx{x $\neq$ 7}?
+
+            \[
+                \tx{e[x := 7]} \krs \tx{True}, \quad \tx{e[x /= 7]} \krs \tx{True}
+            \]
         \end{enumerate}
 
         \item \pt{1.5} Considere la siguiente función \tx{N} que depende de
@@ -171,6 +241,70 @@
             \item Agregue un método \tx{pot} y \tx{leq} para las operaciones de
             potencia y el orden \tx{$\leq$}.
 
+            \tb{Solución:}
+
+            \begin{minted}{java}
+                // Clase de naturales definida en las notas
+                class Nat extends Object {
+                    Object p;
+
+                    Nat (Object n) { super(); this.p = n;}
+
+                    Nat suc() { return new Nat(this); }
+
+                    Nat pred() { return (Nat) this.p; }
+
+                    Nat suma(Nat n) { return this.pred().sum(n.suc());}
+
+                    Nat multi(Nat n) { return n.suma(this.pred().multi(n));}
+
+                    // método 'pot'
+                    Nat pot(Nat n) { return n.flipPot(this) }
+
+                    // método auxiliar para calcular 'pot'
+                    Nat flipPot(Nat n) {return n.multi(this.pred().flipPot(n))}
+
+                    // método 'leq'
+                    Boolean leq(Nat n) {return n.lt(this).not();}
+
+                    // método auxiliar para calcular 'leq'
+                    Boolean lt(Nat n) {return this.pred().lt(n.pred());}
+
+                    // método auxiliar para calcular 'not' en Boolean
+                    Nat inv() {return new Cero(this);}
+
+                }
+
+                // Clase del Cero definida en las notas
+                class Cero extends Nat {
+                    Cero (Object n) {super(n);}
+
+                    Nat pred() {return this;}
+
+                    Nat suma(Nat n) {return n;}
+
+                    Nat multi(Nat n) {return this;}
+
+                    // calcular el caso base del método auxiliar 'flipPot'
+                    Nat flipPot(Nat n) {return this.suc();}
+
+                    // calcular el caso base del método auxiliar 'lt'
+                    Booelan lt(Nat n) {return new Boolean(n);}
+
+                    // método auxiliar para calcular 'not' en Boolean
+                    Nat inv() {return this.suc();}
+                }
+            \end{minted}
+
+            Donde \tx{not} está definido como
+
+            \begin{minted}{java}
+                class Boolean extends Object {
+                    ...
+                    Boolean not() {return new Boolean(this.m.inv());}
+                }
+            \end{minted}
+
             \item Modele la clase \tx{Boolean} para el manejo de valores
             booleanos
             \begin{itemize}
@@ -183,6 +317,21 @@
                 \item Debe tener métodos \tx{true} y \tx{false} que regresen una
                 instancia de \tx{Boolean} según el caso.
             \end{itemize} 
+
+            \tb{Solución:}
+            \begin{minted}{java}
+                class Boolean extends Object {
+                    Nat m;
+
+                    Boolean (Nat n) { super(); this.m = n;}
+
+                    Boolean true() { return new Boolean (new Cero(this).suc());}
+
+                    Boolean false() { return new Boolean (new Cero(this));}
+
+                    Boolean not() { return new Boolean(this.m.inv());}
+                }
+            \end{minted}
         \end{enumerate}
         
         \item \pt{2} Definina el siguiente lenguaje \tx{MinEAB}
@@ -215,21 +364,118 @@
             atributos y por lo tanto sus métodos no tiene cuerpo. Es una 
             interfaz.
 
+            \tb{Solución:}
+
+            \begin{minted}{java}
+                class Expr extends Object {
+
+                    Boolean isAtom() {return error;}
+
+                    Expr lsub() {return error;}
+
+                    Expr rsub() {return error;}
+
+                    Expr eval() {return error;}
+                }
+            \end{minted}
+
             \item Defina las siguientes clases que implemente a \tx{Expr}
             
             \begin{itemize}
                 \item \tx{NumExpr} que implemente los métodos para manejar 
                 números.
 
+                \tb{Solución:}
+
+                \begin{minted}{java}
+                    class NumExpr extends Expr {
+                        Nat v;
+
+                        NumExpr(Nat w) {super(); this.v = w;}
+
+                        Boolean bool() {return new Boolean(new Cero(this));}
+
+                        Boolean true() {return this.bool().true();}
+
+                        Boolean false() {return this.bool().false();}
+
+                        Boolean isAtom() {return this.true();}
+
+                        Expr eval() {return this.v;}
+                    }
+                \end{minted}
+
                 \item \tx{BoolExpr} que implemente los métodos para manejar 
                 booleanos.
+
+                \tb{Solución:}
+
+                \begin{minted}{java}
+                    class BoolExpr extends Expr {
+                        Boolean p;
+
+                        BoolExpr(Boolean q) {super(); this.p = q;}
+
+                        Boolean bool() {return new Boolean(new Cero(this));}
+
+                        Boolean true() {return this.bool().true();}
+
+                        Boolean false() {return this.bool().false();}
+
+                        Boolean isAtom() {return this.true();}
+
+                        Expr eval() {return this.p;}
+                    }
+                \end{minted}
 
                 \item \tx{SumExpr} que implemente los métodos para manejar 
                 sumas.
 
+                \tb{Solución:}
+
+                \begin{minted}{java}
+                    class SumExpr extends Expr {
+                        Expr i;
+                        Expr d;
+
+                        SumExpr(Expr e1, Expr e2) {super(); this.i = e1; this.d = e2}
+
+                        Boolean bool() {return new Boolean(new Cero(this));}
+
+                        Boolean true() {return this.bool().true();}
+
+                        Boolean false() {return this.bool().false();}
+
+                        Boolean isAtom() {return this.false();}
+
+                        Expr eval() {return this.i.eval().suma(this.d.eval());}
+                    }
+                \end{minted}
+
                 \item \tx{LTExpr} que implemente los métodos para manejar 
                 comparaciones de orden.
             \end{itemize}
+
+            \tb{Solución:}
+
+                \begin{minted}{java}
+                    class LTExpr extends Expr {
+                        Expr i;
+                        Expr d;
+
+                        LTExpr(Expr e1, Expr e2) {super(); this.i = e1; this.d = e2}
+
+                        Boolean bool() {return new Boolean(new Cero(this));}
+
+                        Boolean true() {return this.bool().true();}
+
+                        Boolean false() {return this.bool().false();}
+
+                        Boolean isAtom() {return this.false();}
+
+                        Expr eval() {return this.i.eval().lt(this.d.eval());}
+                    }
+                \end{minted}
 
             \item Dé ejemplos de instancias de cada una de las clases 
             anteriores.
@@ -242,6 +488,8 @@
                 \item \tx{NegExpr}
                 \item \tx{IsZero}
             \end{itemize}
+
+            \tb{Solución:}
 
             \item Dé ejemplos de instancias de estas dos clases.
 
