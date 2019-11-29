@@ -234,6 +234,64 @@
         ejemplo de un programa simple que cause un comprotamiento ambigüo o 
         contrainituitivo.
 
+        \begin{itemize}
+            \item \tx{String < Int} e \tx{Int < String}
+
+            Si se tiene algún operador \tx{*} sobrecargado (como en los demás 
+            casos), entonces podría existir amigüedad en la operación.
+
+            ¿Cuál de los dos valores debería recibir el casting?
+
+            En una implementación se podría resolver fijando un elemento como el
+            tipo por omisión para estos caso, pero significaría que la función 
+            podría dar diferentes valores en ciertas condiciones dependiendo las
+            desiciones de diseño del lenguaje, independientemente de la
+            definición de la función.
+
+            \item \tx{String < Int} y \tx{+} sobrecargado
+
+            Considere
+
+            \begin{minted}{haskell}
+                ("1"+"1")+1 = 12
+                "1"+("1"+1) = 3
+            \end{minted}
+
+            Es es que \tx{+} ya no sería asociativa, lo cuál sí cumpliría si
+            \tx{String $\not <$ Int}.
+
+            \item \tx{String < Int} y \tx{=} sobrecargado
+
+            Considere
+
+            \begin{minted}{haskell}
+                "1q" = 1
+                1 = "1e"
+                "1q" /= "1e"
+            \end{minted}
+
+            Es decir, la igualdad ya no es transitiva, lo cuál es chocante
+            porque ya no sería una relación de equivalencia.
+
+            \item \tx{Int < String} y \tx{+} sobrecargado
+
+            Considere
+
+            \begin{minted}{haskell}
+                (1+2)+"a" = "3a"
+                1+(2+"a") = "12a"
+            \end{minted}
+
+            Es es que \tx{+} ya no sería asociativa, lo cuál sí cumpliría si
+            \tx{Int $\not <$ String}.
+
+            Fuera de este inconveniente, todo respecto a los tipos se mantiene 
+            en regla.
+
+            \item \tx{Int < String} y \tx{=} sobrecargado
+            \item \tx{+} y \tx{=} sobrecargados
+        \end{itemize}
+
         \item \pt{1} Usando la definición de números naturales en 
         \tx{Java Peso Pluma} vista en clase.
 
