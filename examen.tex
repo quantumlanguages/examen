@@ -122,6 +122,7 @@ ctaux (Node r i d) = vand r (vand (ctaux i) (ctaux d))
 ct t = handle ctaux t with x => x + 1
         \end{minted}
 
+<<<<<<< HEAD
         Se definen algunos sinónimos para hacer más corta la evaluación
 
         \begin{minted}{haskell}
@@ -154,9 +155,23 @@ e10 = if (isbool x) then x else raise(x)
         \end{minted}
 
         Ahora, vamos a evaluar la expresión:
+=======
+>>>>>>> sandy
 
+		Ahora, para evaluar la expresión, es útil definir lo siguiente
+		
+		
+		\begin{align*}
+		&\tx{a = Node (iszero 9) (Node False Void Void) (Node 5 Void Void)} \\
+		&\tx{r = iszero 9}\\
+		&\tx{i = Node False Void Void}\\
+		&\tx{d = Node 5 Void Void}
+		\end{align*}
+
+        Evaluamos:
         
         \begin{align*}
+<<<<<<< HEAD
         % evaluando a
         &\pop{\es}{ct a}\\
         &\br \pop{\es}{handle ctaux a with x => x+1}\\
@@ -213,6 +228,14 @@ e10 = if (isbool x) then x else raise(x)
         &\krs \prop{handle(-, x.x+1)}{raise(5)}\\
         &\krs \pop{\es}{(x+1)[x := 5]}\\
         &\krs \push{\es}{6}
+=======
+        &\pop{\es}{ct a} \\
+        &\br \pop{\es}{handle ctaux a with x => x + 1}\\
+        &\kr \pop{handle(-, x.x+1)}{ctaux a}\\
+        &\br \pop{handle(-, x.x+1)}{vand r (vand (ctaux i) (ctaux d))}\\
+        &\br \pop{handle(-, x.x+1)}{and bool\_panic r (bool\_panic (vand (ctaux i) (ctaux d)))}\\
+        &\kr \pop{and(-,(bool\_panic (vand (ctaux i) (ctaux d))));handle(-, x.x+1)}{and bool\_panic r }\\
+>>>>>>> sandy
         \end{align*}
 
         \item \pt{1} Considere el siguiente programa, donde suponemos que el
@@ -221,12 +244,19 @@ e10 = if (isbool x) then x else raise(x)
 
         \begin{minted}{haskell}
 not letcc k2 in
-    iszero(2 + letcc k1 in)
+    iszero(2 + letcc k1 in
         3  + if x = pred 8 then
+<<<<<<< HEAD
             4 * pred (continue k1 6
             else 5 * suc (continue k2 false)
         end
         )
+=======
+            	4 * pred (continue k1 6)
+             else 5 * suc (continue k2 false)
+          end
+    )
+>>>>>>> sandy
     end
 end
         \end{minted}
@@ -234,11 +264,12 @@ end
             \item ¿Cuáles son los tipos de \tp{k1} y \tp{k2}?
 
             \[
-                \tx{k1 : Cont(Integer)} \quad \tx{k2 : Cont(Bool)}
+                \tx{k1 : } \tp{Cont(Integer)} \quad \tx{k2 : } \tp{Cont(Bool)}
             \]
 
             \item ¿A qué continuaciones se ligan las variables \tp{k1} y \tp{k2}?
 
+<<<<<<< HEAD
             \[
                 \tp{k1 --> (continue k1 6)} 
                 \kr \tp{(continue (not(-), iszero(-), suma(2, -)) 6)}
@@ -249,11 +280,194 @@ end
                 \kr \tp{(continue (not(-)) false)}
             \]
 
+=======
+			\[
+			\tx{k1 --> (continue k1 6)} 
+			\kr \tp{(continue (not(-), iszero(-), suma(2, -)), 6)}
+			\]
+			
+			\[
+			\tx{k2 --> (continue k2 false)} 
+			\kr \tp{(continue (not(-)), false)}
+			\]
+			
+>>>>>>> sandy
             \item ¿A qué se evalúa el programa para \tp{x = 7} y para \tp{x $\neq$ 7}?
+     		
+     		Evaluamos, considerando \tp{x = 7}
 
-            \[
-                \tp{e[x := 7]} \krs \tp{True}, \quad \tp{e[x /= 7]} \krs \tp{True}
-            \]
+			\begin{align*}
+			&\pop{\es}{not(letcc[Bool](k2.iszero(2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad  if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(k2,False))))))}\\
+			&\kr \pop{not(-); \es}{letcc[Bool](k2.iszero(2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(k2,False)))))}\\
+			&\kr \pop{not(-); \es}{iszero(2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(k2,False)))) [k2:= cont(not(-); \es)]}\\
+			&\equiv \quad \quad \pop{not(-); \es}{iszero(2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False))))}\\		
+			\end{align*}
+			\begin{align*}			
+			&\kr \pop{iszero(-); not(-); \es}{2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\kr \tx{suma(-, letcc[Integer](k1.3 + if(x=pred(8),4 * pred(continue(k1,6)), 5 *}\\ &\tx{\quad \quad \quad suc(continue(cont(not(-); \es),False)))); iszero(-); not(-); \es $\quad \succ$ 2}\\
+			&\kr \tx{suma(-, letcc[Integer](k1.3 + if(x=pred(8),4 * pred(continue(k1,6)), 5 *}\\ &\tx{\quad \quad \quad suc(continue(cont(not(-); \es),False)))); iszero(-); not(-); \es $\quad \prec$ 2}\\
+			&\kr \pop{suma(2,-); iszero(-); not(-); \es}{letcc[Integer](k1.3 +}\\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\kr \pop{suma(2,-); iszero(-); not(-); \es}{3 +}\\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False))}\\
+			&\tx{\quad \quad \quad [k1:= cont(suma(2,-); iszero(-); not(-); \es)]}\\
+			& \equiv \quad \quad \pop{suma(2,-); iszero(-); not(-); \es}{3 +}\\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)),}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False))}\\
+			& \kr \tx{suma(-, if(x=pred(8),4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)),}\\
+			&\tx{\quad \quad \quad5 * suc(continue(cont(not(-); \es),False))); suma(2,-); iszero(-); not(-); \es}\\
+			&\tx{\quad \quad \quad $\succ$ 3}\\
+			& \kr \tx{suma(-, if(x=pred(8),4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)),}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False))); suma(2,-); iszero(-); not(-); \es}\\
+			&\tx{\quad \quad \quad $\prec$ 3}\\
+			&\kr \pop{suma(3,-); suma(2,-); iszero(-); not(-); \es}{if(x=pred(8),4 *}\\
+			&\tx{\quad \quad \quad pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)),}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\kr \tx{if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ x=pred(8)}\\
+			&\kr \tx{=(-,pred(8)); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ x} \tx{\quad con x=7}\\	
+			&\kr \tx{=(-,pred(8)); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ x} \tx{\quad con x=7}\\	
+			&\kr \tx{=(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ pred(8)} \\
+			&\kr \tx{pred(-); =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ 8} \\
+			\end{align*}
+			\begin{align*}
+			&\kr \tx{pred(-); =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ 8} \\
+			&\kr \tx{ =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ 7} \\
+			&\kr \tx{ =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ 7} \\
+			&\kr \tx{if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ True} \\			
+			&\kr \pop{suma(3,-); suma(2,-); iszero(-); not(-); \es} {4 *}\\
+			&\tx{\quad \quad \quad pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6))} \\
+			&\kr \tx{*(-, pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)));}\\
+			&\tx{\quad \quad \quad suma(3,-); suma(2,-); iszero(-); not(-); \es $\ \succ $ 4}\\
+			&\kr \tx{*(-, pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6));}\\
+			&\tx{\quad \quad \quad suma(3,-); suma(2,-); iszero(-); not(-); \es $\ \prec $ 4}\\
+			&\kr \tx{*(4,-); suma(3,-); suma(2,-); iszero(-); not(-); \es}\\
+			&\tx{\quad \quad \quad $\succ $ pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6))}\\
+			&\kr \tx{pred(-); *(4,-); suma(3,-); suma(2,-); iszero(-); not(-); \es}\\
+			&\tx{\quad \quad \quad $\succ $ continue(cont(suma(2,-); iszero(-); not(-); \es),6)}\\
+			&\kr \tx{continue(-,6); pred(-); *(4,-); suma(3,-); suma(2,-); iszero(-); not(-); \es}\\
+			&\tx{\quad \quad \quad $\succ $ cont(suma(2,-); iszero(-); not(-); \es)}\\
+			&\kr \tx{continue(-,6); pred(-); *(4,-); suma(3,-); suma(2,-); iszero(-); not(-); \es}\\
+			&\tx{\quad \quad \quad $\prec $ cont(suma(2,-); iszero(-); not(-); \es)}\\
+			&\kr \tx{continue(cont(suma(2,-); iszero(-); not(-); \es),-); pred(-); *(4,-);}\\
+			&\tx {\quad \quad \quad suma(3,-); suma(2,-); iszero(-); not(-); \es  $\ \succ $6}\\
+			&\kr \tx{continue(cont(suma(2,-); iszero(-); not(-); \es),-); pred(-); *(4,-);}\\
+			&\tx {\quad \quad \quad suma(3,-); suma(2,-); iszero(-); not(-); \es  $\ \prec $6}\\
+			&\kr \push {suma(2,-); iszero(-); not(-); \es}{6}\\
+			&\kr \push {iszero(-); not(-); \es}{8}\\
+			&\kr \push {not(-); \es}{False}\\
+			&\kr \push {\es}{True}\\
+			\end{align*} 
+
+			
+			Ahora 	Evaluamos, considerando \tp{x $\neq$ 7}
+			
+			\begin{align*}
+			&\pop{\es}{not(letcc[Bool](k2.iszero(2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad  if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(k2,False))))))}\\
+			&\kr \pop{not(-); \es}{letcc[Bool](k2.iszero(2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(k2,False)))))}\\
+			&\kr \pop{not(-); \es}{iszero(2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(k2,False)))) [k2:= cont(not(-); \es)]}\\
+			&\equiv \quad \quad \pop{not(-); \es}{iszero(2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False))))}\\		
+			&\kr \pop{iszero(-); not(-); \es}{2 + letcc[Integer](k1.3 +} \\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\kr \tx{suma(-, letcc[Integer](k1.3 + if(x=pred(8),4 * pred(continue(k1,6)), 5 *}\\ &\tx{\quad \quad \quad suc(continue(cont(not(-); \es),False)))); iszero(-); not(-); \es $\quad \succ$ 2}\\
+			&\kr \tx{suma(-, letcc[Integer](k1.3 + if(x=pred(8),4 * pred(continue(k1,6)), 5 *}\\ &\tx{\quad \quad \quad suc(continue(cont(not(-); \es),False)))); iszero(-); not(-); \es $\quad \prec$ 2}\\
+			&\kr \pop{suma(2,-); iszero(-); not(-); \es}{letcc[Integer](k1.3 +}\\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\kr \pop{suma(2,-); iszero(-); not(-); \es}{3 +}\\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False))}\\
+			&\tx{\quad \quad \quad [k1:= cont(suma(2,-); iszero(-); not(-); \es)]}\\
+			& \equiv \quad \quad \pop{suma(2,-); iszero(-); not(-); \es}{3 +}\\
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)),}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False))}\\
+			& \kr \tx{suma(-, if(x=pred(8),4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)),}\\
+			&\tx{\quad \quad \quad5 * suc(continue(cont(not(-); \es),False))); suma(2,-); iszero(-); not(-); \es}\\
+			&\tx{\quad \quad \quad $\succ$ 3}\\
+			& \kr \tx{suma(-, if(x=pred(8),4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)),}\\
+			&\tx{\quad \quad \quad5 * suc(continue(cont(not(-); \es),False))); suma(2,-); iszero(-); not(-); \es}\\
+			&\tx{\quad \quad \quad $\prec$ 3}\\
+			&\kr \pop{suma(3,-); suma(2,-); iszero(-); not(-); \es}{if(x=pred(8),4 *}\\
+			&\tx{\quad \quad \quad pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)),}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\kr \tx{if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ x=pred(8)}\\
+			&\kr \tx{=(-,pred(8)); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ x} \tx{\quad con x=7}\\	
+			&\kr \tx{=(-,pred(8)); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ x} \tx{\quad con x $\neq$ 7}\\	
+			&\kr \tx{=(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ pred(8)} \\
+			&\kr \tx{pred(-); =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ 8} \\
+			\end{align*}
+			\begin{align*}
+			&\kr \tx{pred(-); =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ 8} \\
+			&\kr \tx{ =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ 7} \\
+			&\kr \tx{ =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ 7} \\
+			&\kr \tx{if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
+			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
+			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ False} \\
+			&\kr \pop{suma(3,-); suma(2,-); iszero(-); not(-); \es} {5 * suc(continue(cont(not(-); \es),False))} \\		
+			&\kr \pop{*(-,suc(continue(cont(not(-); \es),False))); suma(3,-); suma(2,-); iszero(-); not(-); \es} {5} \\	
+			&\kr \push{*(-,suc(continue(cont(not(-); \es),False))); suma(3,-); suma(2,-); iszero(-); not(-); \es} {5} \\
+			&\kr \pop{*(5,); suma(3,-); suma(2,-); iszero(-); not(-); \es} {suc(continue(cont(not(-); \es),False))} \\
+			&\kr \pop{suc(-); *(5,-); suma(3,-); suma(2,-); iszero(-); not(-); \es} {continue(cont(not(-); \es),False)} \\	
+			&\kr \pop{continue(-,False); suc(-); *(5,-); suma(3,-); suma(2,-);iszero(-);not(-); \es} {cont(not(-);\es)} \\	
+			&\kr \push{continue(-,False); suc(-); *(5,-); suma(3,-); suma(2,-);iszero(-);not(-); \es} {cont(not(-);\es)} \\	
+			&\kr \pop{continue(cont(not(-); \es),-); suc(-); *(5,-); suma(3,-);suma(2,-);iszero(-); not(-);\es} {False} \\
+			&\kr \push{continue(cont(not(-); \es),-); suc(-); *(5,-); suma(3,-);suma(2,-);iszero(-); not(-);\es} {False} \\
+			&\kr \push{not(-); \es} {False} \\
+			&\kr \push{\es} {True} \\				
+			\end{align*} 
         \end{enumerate}
 
         \item \pt{1.5} Considere la siguiente función \tp{N} que depende de
@@ -329,7 +543,7 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
         contrainituitivo.
 
         \begin{itemize}
-            \item \tp{String < Int} e \tp{Int < String}
+            \item \tp{String $\leq$ Int} e \tp{Int $\leq$ String}
 
             Si se tiene algún operador \tp{*} sobrecargado (como en los demás
             casos), entonces podría existir amigüedad en la operación.
@@ -342,6 +556,7 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             desiciones de diseño del lenguaje, independientemente de la
             definición de la función.
 
+<<<<<<< HEAD
             Por ejemplo, con una expresión \tp{1+"2"}, ¿cuál es el tipo del
             resultado? Usando únicamente los principios básicos del subtipado, 
             ambos tipos serían correctos, lo que haría que una expresión tenga 
@@ -351,6 +566,9 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             los datos.
 
             \item \tp{String < Int} y \tp{+} sobrecargado
+=======
+            \item \tp{String $\leq$ Int} y \tp{+} sobrecargado
+>>>>>>> sandy
 
             Considere
 
@@ -360,9 +578,9 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             \end{minted}
 
             Es es que \tp{+} ya no sería asociativa, lo cuál sí cumpliría si
-            \tp{String $\not <$ Int}.
+            \tp{String $\not \leq$ Int}.
 
-            \item \tp{String < Int} y \tp{=} sobrecargado
+            \item \tp{String $\leq$ Int} y \tp{=} sobrecargado
 
             Considere
 
@@ -375,7 +593,7 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             Es decir, la igualdad ya no es transitiva, lo cuál es chocante
             porque ya no sería una relación de equivalencia.
 
-            \item \tp{Int < String} y \tp{+} sobrecargado
+            \item \tp{Int $\leq$ String} y \tp{+} sobrecargado
 
             Considere
 
@@ -385,11 +603,12 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             \end{minted}
 
             Es es que \tp{+} ya no sería asociativa, lo cuál sí cumpliría si
-            \tp{Int $\not <$ String}.
+            \tp{Int $\not \leq$ String}.
 
             Fuera de este inconveniente, todo respecto a los tipos se mantiene
             en regla.
 
+<<<<<<< HEAD
             \item \tp{Int < String} y \tp{=} sobrecargado
 
             El único caso donde se haría cohersión sería al tener una cadena y 
@@ -400,6 +619,9 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             igualdad.
 
             No hay ningún aspecto inusual en este caso.
+=======
+            \item \tp{Int $\leq$ String} y \tp{=} sobrecargado
+>>>>>>> sandy
             \item \tp{+} y \tp{=} sobrecargados
 
             Si suponemos que no se cumple que algún tipo es subtipo del otro,
@@ -508,7 +730,7 @@ class Boolean extends Object {
                 \item La clase debe extender de \tp{Object}
 
                 \item El constructor recibirá un objeto de la clase \tp{Nat}
-                para definir su valor. \tp{0} representa \tp{true} y \tp{1}
+                para definir su valor \tp{0} representa \tp{false} y \tp{1}
                 representa \tp{true}.
 
                 \item Debe tener métodos \tp{true} y \tp{false} que regresen una
