@@ -188,6 +188,8 @@ e10 = if (isbool x) then x else raise(x)
         &\kr \pop{and(-, e7), let(-, x.e10), s2}{e5}\\
         &\br \pop{s3}{let x = e4 in e10}\\
         &\kr \pop{let(-, e10), s3}{e4}\\
+        \end{align*}
+        \begin{align*}
         % evaluando raíz del subárbol derecho
         &\br \pop{let(-, e10), s3}{and (bool-panic f) e9}\\
         &\kr \pop{and(-, e9), let(-, e10), s3}{bool-panic f}\\
@@ -200,8 +202,6 @@ e10 = if (isbool x) then x else raise(x)
         &\br \pop{let(-, x.e10), s4}{and e12 e12}\\
         &\kr \pop{and(-, e12), let(-, x.e10), s4}{e12}\\
         &\br \pop{and(-, e12), let(-, x.e10), s4}{let x = e11 in e10}\\
-    \end{align*}
-    \begin{align*}
         &\kr \pop{let(, x.e10), and(-, e12), let(-, x.e10), s4}{ctaux Void}\\
         &\kr \push{let(, x.e10), and(-, e12), let(-, x.e10), s4}{t}\\
         &\kr \pop{and(-, e12), let(-, x.e10), s4}{(if isbool x then x else raise(x))[x := true]}\\
@@ -272,9 +272,7 @@ end
 			&\kr \pop{not(-); \es}{iszero(2 + letcc[Integer](k1.3 +} \\
 			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(k2,False)))) [k2:= cont(not(-); \es)]}\\
 			&\equiv \quad \quad \pop{not(-); \es}{iszero(2 + letcc[Integer](k1.3 +} \\
-			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False))))}\\		
-			\end{align*}
-			\begin{align*}			
+			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False))))}\\					
 			&\kr \pop{iszero(-); not(-); \es}{2 + letcc[Integer](k1.3 +} \\
 			&\tx{\quad \quad \quad if(x=pred(8),4 * pred(continue(k1,6)), 5 * suc(continue(cont(not(-); \es),False)))}\\
 			&\kr \tx{suma(-, letcc[Integer](k1.3 + if(x=pred(8),4 * pred(continue(k1,6)), 5 *}\\ &\tx{\quad \quad \quad suc(continue(cont(not(-); \es),False)))); iszero(-); not(-); \es $\quad \succ$ 2}\\
@@ -301,7 +299,9 @@ end
 			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ x=pred(8)}\\
 			&\kr \tx{=(-,pred(8)); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
 			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
-			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ x} \tx{\quad con x=7}\\	
+			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ x} \tx{\quad con x=7}\\
+			\end{align*}
+			\begin{align*}	
 			&\kr \tx{=(-,pred(8)); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
 			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
 			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \prec $ x} \tx{\quad con x=7}\\	
@@ -311,8 +311,6 @@ end
 			&\kr \tx{pred(-); =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
 			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
 			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ 8} \\
-			\end{align*}
-			\begin{align*}
 			&\kr \tx{pred(-); =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
 			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
 			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
@@ -402,12 +400,12 @@ end
 			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
 			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
 			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ pred(8)} \\
+			\end{align*}
+			\begin{align*}
 			&\kr \tx{pred(-); =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}
 			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
 			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
 			&\tx{\quad \quad \quad suma(2,-); iszero(-); not(-); \es $\ \succ $ 8} \\
-			\end{align*}
-			\begin{align*}
 			&\kr \tx{pred(-); =(x,-); if(-, 4 * pred(continue(cont(suma(2,-); iszero(-); not(-); \es),6)) ,}\\
 			&\tx{\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))}\\
 			&\tx {\quad \quad \quad 5 * suc(continue(cont(not(-); \es),False)))); suma(3,-);}\\
@@ -462,7 +460,7 @@ N x = h (f x) (44 - y) (g y)
         denotadas por \tp{cpsf, cpsg, cpsh}.
 
         \ti{Atención:} Las operaciones aritméticas deben permanecer sin cambios.
-        Es decir, no se piden las versiones \tp{cps} de \tp{+, -}.
+        Es decir, no se piden las versiones \tp{cps} de \tp{+, -}.\\
 
 		\tb{Solución}
 		\begin{minted}{haskell}
