@@ -342,6 +342,14 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             desiciones de diseño del lenguaje, independientemente de la
             definición de la función.
 
+            Por ejemplo, con una expresión \tp{1+"2"}, ¿cuál es el tipo del
+            resultado? Usando únicamente los principios básicos del subtipado, 
+            ambos tipos serían correctos, lo que haría que una expresión tenga 
+            dos tipos.
+
+            Además, el casting hacia entero provoca pérdida de información en 
+            los datos.
+
             \item \tp{String < Int} y \tp{+} sobrecargado
 
             Considere
@@ -383,7 +391,23 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             en regla.
 
             \item \tp{Int < String} y \tp{=} sobrecargado
+
+            El único caso donde se haría cohersión sería al tener una cadena y 
+            un número. Pero la única cadena a la que el número es igual es a su 
+            converisón dígito a dígito.
+
+            Por lo que aún cuando se mezclen los argumentos, se mantiene la 
+            igualdad.
+
+            No hay ningún aspecto inusual en este caso.
             \item \tp{+} y \tp{=} sobrecargados
+
+            Si suponemos que no se cumple que algún tipo es subtipo del otro,
+            entonces toda aplicación de estos operadores siempre resultría en 
+            operaciones entre cosas del mismo tipo.
+
+            Por lo que no hay ningún cambio o aspecto contraintuitivo en este 
+            caso.
         \end{itemize}
 
         \item \pt{1} Usando la definición de números naturales en
