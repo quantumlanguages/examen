@@ -38,6 +38,7 @@
 \newcommand{\es}{$\square$}
 \newcommand{\pop}[2]{ \tx{#1} \succ \tx{#2}}
 \newcommand{\push}[2]{ \tx{#1} \prec \tx{#2}}
+\newcommand{\prop}[2]{\tx{#1} \ll \tx{#2}}
 \newcommand{\kr}{\rightarrow_{\mathcal{K}} \quad}
 \newcommand{\br}{\rightarrow_{\beta} \quad}
 \newcommand{\krs}{\rightarrow_{\mathcal{K}}^{\star} \quad}
@@ -137,6 +138,7 @@ p1 = iszero 9
 s1 = and(-, e2), handle(-, x.x+1)
 s2 = and(f, -), handle(-, x.x+1)
 s3 = and(-, e7), let(-, x.e10), s2
+s4 = and(f, -), let(-, e10), s3
 -- otras expresiones
 e3 = (vand (ctaux i) (ctaux d))
 e2 = bool-panic e3
@@ -144,8 +146,9 @@ e4 = ctaux i
 e5 = (bool-panic (ctaux i))
 e6 = ctaux d
 e7 = (bool-panic (ctaux d))
-e6 = ctaux Void
-e8 = (vand e6 e6)
+e11 = ctaux Void
+e12 = bool-panic e11
+e8 = (vand e11 e11)
 e9 = bool-panic e8
 e10 = if (isbool x) then x else raise(x)
         \end{minted}
@@ -174,12 +177,42 @@ e10 = if (isbool x) then x else raise(x)
         &\kr \pop{and(-, e7), let(-, x.e10), s2}{e5}\\
         &\br \pop{s3}{let x = e4 in e10}\\
         &\kr \pop{let(-, e10), s3}{e4}\\
+        % evaluando raíz del subárbol derecho
         &\br \pop{let(-, e10), s3}{and (bool-panic f) e9}\\
         &\kr \pop{and(-, e9), let(-, e10), s3}{bool-panic f}\\
         &\br \pop{and(-, e9), let(-, e10), s3}{let x = f in e10}\\
         &\krs \push{and(-, e9), let(-, e10), s3}{f}\\
+        % evaluando subárboles del subárbol derecho
         &\kr \pop{and(f, -), let(-, e10), s3}{e9}\\
-        &\br \pop{and(f, -), let(-, e10), s3}{let x = e8 in e10}\\
+        &\br \pop{s4}{let x = e8 in e10}\\
+        &\kr \pop{let(-, x.e10), s4}{e8}\\
+        &\br \pop{let(-, x.e10), s4}{and e12 e12}\\
+        &\kr \pop{and(-, e12), let(-, x.e10), s4}{e12}\\
+        &\br \pop{and(-, e12), let(-, x.e10), s4}{let x = e11 in e10}\\
+    \end{align*}
+    \begin{align*}
+        &\kr \pop{let(, x.e10), and(-, e12), let(-, x.e10), s4}{ctaux Void}\\
+        &\kr \push{let(, x.e10), and(-, e12), let(-, x.e10), s4}{t}\\
+        &\kr \pop{and(-, e12), let(-, x.e10), s4}{(if isbool x then x else raise(x))[x := true]}\\
+        &\krs \pop{and(true, -), let(-, x.e10), s4}{e12}\\
+        &\krs \push{and(true, -), let(-, x.e10), s4}{t}\\
+        &\krs \pop{s4}{(if isbool x then x else raise(x))[x := t]}\\
+        &\krs \push{and(f, -), let(-, e10), s3}{t}\\
+        &\krs \pop{s3}{(if isbool x then x else raise(x))[x := f]}\\
+        &\krs \push{and(-, e7), let(-, x.e10), s2}{f}\\
+        &\krs \pop{and(f, -), let(-, x.e10), s2}{e7}\\
+        &\br \pop{and(f, -), let(-, x.e10), s2}{let x = e6 in e10}\\
+        &\kr \pop{let(-, x.e10), and(f, -), let(-, x.e10), s2}{e6}\\
+        &\br \pop{let(-, x.e10), and(f, -), let(-, x.e10), s2}{and (bool-panic 5) e8}\\
+        &\kr \pop{and(-, e8), let(-, x.e10), and(f, -), let(-, x.e10), s2}{bool-panic 5}\\
+        &\br \pop{and(-, e8), let(-, x.e10), and(f, -), let(-, x.e10), s2}{let x = 5 in e10}\\
+        &\krs \pop{and(-, e8), let(-, x.e10), and(f, -), let(-, x.e10), s2}{if isbool 5 then 5 else raise(5)}\\
+        &\krs \prop{and(-, e8), let(-, x.e10), and(f, -), let(-, x.e10), s2}{raise(5)}\\
+        &\krs \prop{and(f, -), let(-, x.e10), s2}{raise(5)}\\
+        &\krs \prop{and(f, -), handle(-, x.x+1)}{raise(5)}\\
+        &\krs \prop{handle(-, x.x+1)}{raise(5)}\\
+        &\krs \pop{\es}{(x+1)[x := 5]}\\
+        &\krs \push{\es}{6}
         \end{align*}
 
         \item \pt{1} Considere el siguiente programa, donde suponemos que el
