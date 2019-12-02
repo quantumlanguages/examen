@@ -529,10 +529,11 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             ambos tipos serían correctos, lo que haría que una expresión tenga 
             dos tipos.
 
-            Además, el casting hacia entero provoca pérdida de información en 
-            los datos.
-
             \item \tp{String < Int} y \tp{+} sobrecargado
+
+            La cohersión de cadena a entero provoca pérdida de información, lo 
+            cuál puede crear casos extraños, si bien los principios del 
+            subtipado se mantienen.
 
             Considere
 
@@ -541,10 +542,12 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
 "1"+("1"+1) = 3
             \end{minted}
 
-            Es es que \tp{+} ya no sería asociativa, lo cuál sí cumpliría si
-            \tp{String $\not \leq$ Int}.
+            \tp{+} ya no sería asociativa.
 
             \item \tp{String $\leq$ Int} y \tp{=} sobrecargado
+
+            Como la cohersión de cadena a entero causa pérdida de información,
+            el comportmiento de \tp{=} se vuelve un poco contraintuitivo.
 
             Considere
 
@@ -554,10 +557,16 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
 "1q" /= "1e"
             \end{minted}
 
-            Es decir, la igualdad ya no es transitiva, lo cuál es chocante
-            porque ya no sería una relación de equivalencia.
+            \tp{=} ya no es transitiva, lo cuál es chocante porque ya no sería 
+            una relación de equivalencia.
+
+            A pesar de esto, los principios del  subtipado se mantienen.
 
             \item \tp{Int $\leq$ String} y \tp{+} sobrecargado
+
+            Con varias aplicaciones del operador con diferentes tipos, el 
+            tipo de la operación total dependerá del orden en el que se hagan
+            las operaciones internas.
 
             Considere
 
@@ -566,8 +575,7 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
 1+(2+"a") = "12a"
             \end{minted}
 
-            Es es que \tp{+} ya no sería asociativa, lo cuál sí cumpliría si
-            \tp{Int $\not \leq$ String}.
+            \tp{+} ya no sería asociativa.
 
             Fuera de este inconveniente, todo respecto a los tipos se mantiene
             en regla.
@@ -576,20 +584,24 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
 
             El único caso donde se haría cohersión sería al tener una cadena y 
             un número. Pero la única cadena a la que el número es igual es a su 
-            converisón dígito a dígito.
+            converisón dígito a dígito, por lo que no se pierde información.
 
             Por lo que aún cuando se mezclen los argumentos, se mantiene la 
             igualdad.
 
             No hay ningún aspecto inusual en este caso.
+
             \item \tp{+} y \tp{=} sobrecargados
 
             Si suponemos que no se cumple que algún tipo es subtipo del otro,
-            entonces toda aplicación de estos operadores siempre resultría en 
+            entonces toda aplicación de estos operadores siempre resultarí en 
             operaciones entre cosas del mismo tipo.
 
-            Por lo que no hay ningún cambio o aspecto contraintuitivo en este 
-            caso.
+            Mezclar tipos en los argumentos resultaría en un error de tipo. Por
+            lo que no hay casos extraños causados por estas mezclas.
+
+            No hay ningún cambio o aspecto contraintuitivo en este caso.
+
         \end{itemize}
 
         \item \pt{1} Usando la definición de números naturales en
