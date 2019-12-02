@@ -24,6 +24,9 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 
+% trees
+\usepackage{ebproof}
+
 % code
 \usepackage{minted}
 \usemintedstyle{manni}
@@ -819,6 +822,10 @@ class SumExpr extends Expr {
 
     Boolean isAtom() {return (new Booelan(new Cero(this))).false();}
 
+    Expr lsub() {return this.i;}
+    
+    Expr rsub() {return this.d;}
+
     Expr eval() {return new NumExpr(this.i.eval().v.suma(this.d.eval().v));}
 }
                 \end{minted}
@@ -836,6 +843,10 @@ class LTExpr extends Expr {
     LTExpr(Expr e1, Expr e2) {super(); this.i = e1; this.d = e2}
 
     Boolean isAtom() {return (new Boolean(new Cero(this))).false();}
+
+    Expr lsub() {return this.i;}
+    
+    Expr rsub() {return this.d;}
 
     Expr eval() {return new BoolExpr(this.i.eval().v.lt(this.d.eval().v));}
 }
@@ -1044,10 +1055,102 @@ p ::= public | protected | private // modificacor de privacidad
 
         \ti{Sugerencia:} Cuando se verifique si un método está bien formado en
         una clase \tp{C}, se debe verificar si la expresión en el cuerpo del
-        método no se reifere a métodos o atributos en otra clase \tp{D} que sean
+        método no se refiere a métodos o atributos en otra clase \tp{D} que sean
         privados o protegidos si \tp{C $\not \leq$ D}. Podría necesitarse el
         paso de algo más en el contexto \tp{$\Gamma$} en el juicio de tipado
         para expresiones.
+
+        \tb{Solución:}
+
+        Primero, hay que restringir el acceso de los atributos, que está dado 
+        orignalmente por la regla \tx{T-FLD}
+
+        Los atributos públicos no cambian
+
+        \[\begin{prooftree}
+            \hypo{\Gamma, Caller(this) : Call(E) \vdash e : C}
+            \hypo{fields(C) = $\tvec{p}\tvec{C}\tvec{f}$}
+            \hypo{p_i = public}
+            \infer 3 [T-FLD-PUB] {\Gamma, Caller(this) : Call(E) \vdash e.f_i : C_i}
+        \end{prooftree}
+        \]
+
+        Los atributos protegidos requieren que la clase que llama sea subtipo de
+        la clase donde están los atributos.
+
+        \[
+        \begin{prooftree}
+            \hypo{\Gamma, Caller(this) : Call(E) \vdash e : C}
+            \hypo{fields(C) = $\tvec{p}\tvec{C}\tvec{f}$}
+            \hypo{p_i = protected}
+            \hypo{E \leq C}
+            \infer 4 [T-FLD-PROC] {\Gamma, Caller(this) : Call(E) \vdash e.f_i : C_i}
+        \end{prooftree}
+        \]
+
+        Los atributos privados solo se puede acceder desde la clase misma.
+
+        \[
+        \begin{prooftree}
+            \hypo{\Gamma, Caller(this) : Call(E) \vdash e : C}
+            \hypo{fields(C) = $\tvec{p}\tvec{C}\tvec{f}$}
+            \hypo{p_i = private}
+            \hypo{E = C}
+            \infer 4 [T-FLD-PRIV] {\Gamma, Caller(this) : Call(E) \vdash e.f_i : C_i}
+        \end{prooftree}
+        \]
+
+        Se requieren modificaciones análogas a la regla \tx{T-INV} para la 
+        invocación de métodos.
+
+        La invocación de métodos públicos no requiere verificación
+
+        \[\begin{prooftree}
+            \hypo{\Gamma, Caller(this) : Call(E) \vdash e_0 : C_0}
+            \hypo{\Gamma \vdash \vec{e_0} : \vec{C_0}}
+            \hypo{mtype(m, C_0) = p \ \vec{D} \rightarrow C}
+            \hypo{\vec{C} \leq \vec{D}}
+            \hypo{p = public}
+            \infer 5 [T-INV-PUB] {\Gamma, Caller(this) : Call(E) \vdash e_0.m(\vec{e}) : C}
+        \end{prooftree}\]
+
+        Para los métodos protegidos, la clase que invoca debe ser subtipo
+
+        \[\begin{prooftree}
+            \hypo{\Gamma, Caller(this) : Call(E) \vdash e_0 : C_0}
+            \hypo{\Gamma \vdash \vec{e_0} : \vec{C_0}}
+            \hypo{mtype(m, C_0) = p \ \vec{D} \rightarrow C}
+            \hypo{\vec{C} \leq \vec{D}}
+            \hypo{E \leq C_0}
+            \hypo{p = protected}
+            \infer 6 [T-INV-PROC] {\Gamma, Caller(this) : Call(E) \vdash e_0.m(\vec{e}) : C}
+        \end{prooftree}\]
+
+        Para métodos privados, la clase que invoca y la clase que tiene los
+        métodos deben ser la misma
+
+        \[\begin{prooftree}
+            \hypo{\Gamma, Caller(this) : Call(E) \vdash e_0 : C_0}
+            \hypo{\Gamma \vdash \vec{e_0} : \vec{C_0}}
+            \hypo{mtype(m, C_0) = p \ \vec{D} \rightarrow C}
+            \hypo{\vec{C} \leq \vec{D}}
+            \hypo{E = C_0}
+            \hypo{p = private}
+            \infer 6 [T-INV-PRIV] {\Gamma, Caller(this) : E \vdash e_0.m(\vec{e}) : C}
+        \end{prooftree}\]
+
+        Además, es necesario agregar la clase que invoca al contexto de las
+        expresiones que forma el cuerpo de los métodos durante la revisión de la
+        buena formación de métodos.
+
+        \[\begin{prooftree}
+            \hypo{T(C) = class \ C \ extends \ D\{...\}}
+            \infer [no rule] 1 {mtype(m, D) = p \ \vec{C} \rightarrow C_0}
+            \infer [no rule] 1 {\vec{x}:\vec{C}, this:C, Caller(this) : Call(C) \vdash e_0 : C_0'}
+            \infer [no rule] 1 {C_0' \leq C_0}
+            \infer 1 {$p $C_0$ m \{return $e_0$ ;\} ok in C$}
+        \end{prooftree}\]
+
 
     \end{enumerate}
 \end{document}
