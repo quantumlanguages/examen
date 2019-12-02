@@ -529,7 +529,7 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             ambos tipos serían correctos, lo que haría que una expresión tenga 
             dos tipos.
 
-            \item \tp{String < Int} y \tp{+} sobrecargado
+            \item \tp{String $\leq$ Int} y \tp{+} sobrecargado
 
             La cohersión de cadena a entero provoca pérdida de información, lo 
             cuál puede crear casos extraños, si bien los principios del 
@@ -580,7 +580,7 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             Fuera de este inconveniente, todo respecto a los tipos se mantiene
             en regla.
 
-            \item \tp{Int < String} y \tp{=} sobrecargado
+            \item \tp{Int $\leq$ String} y \tp{=} sobrecargado
 
             El único caso donde se haría cohersión sería al tener una cadena y 
             un número. Pero la única cadena a la que el número es igual es a su 
@@ -862,7 +862,7 @@ BoolExpr falseE = new BoolExpr(new Boolean(cero));
 SumExpr sumCE = new SumExpr(ceroE, ceroE);
 
 // LTExpr
-LTExpr lC = new lteXPR(ceroE, ceroE);
+LTExpr lC = new LTExpr(ceroE, ceroE);
             \end{minted}
 
             \item Extienda \tp{MinEAB} con las expresiones \tp{-e, iszero e}.
@@ -967,10 +967,10 @@ class Int extends Object {
                 Y se usa este método para
 
                 \begin{minted}{java}
-class IsZero extends Expr {
+class IsZExpr extends Expr {
     Expr e;
 
-    isZero(Expr e) {super(); this.e = e;}
+    IsZExpr(Expr e) {super(); this.e = e;}
 
     Boolean isAtom() {return (new Booelan(new Nat(this))).false();}
 
@@ -989,7 +989,7 @@ Int ceroI = new Int(new Cero(this), new Cero(this));
 NegExpr ceroE = new NegExpr(ceroI);
 
 // IsZero
-IsZero isZE = new IsZero(ceroI);
+IsZero isZE = new IsZExpr(ceroI);
             \end{minted}
 
             \item ¿Cómo se modifican las subclases de \tp{Expr} definidas en
