@@ -122,7 +122,6 @@ ctaux (Node r i d) = vand r (vand (ctaux i) (ctaux d))
 ct t = handle ctaux t with x => x + 1
         \end{minted}
 
-<<<<<<< HEAD
         Se definen algunos sinónimos para hacer más corta la evaluación
 
         \begin{minted}{haskell}
@@ -155,8 +154,6 @@ e10 = if (isbool x) then x else raise(x)
         \end{minted}
 
         Ahora, vamos a evaluar la expresión:
-=======
->>>>>>> sandy
 
 		Ahora, para evaluar la expresión, es útil definir lo siguiente
 		
@@ -171,7 +168,6 @@ e10 = if (isbool x) then x else raise(x)
         Evaluamos:
         
         \begin{align*}
-<<<<<<< HEAD
         % evaluando a
         &\pop{\es}{ct a}\\
         &\br \pop{\es}{handle ctaux a with x => x+1}\\
@@ -228,14 +224,6 @@ e10 = if (isbool x) then x else raise(x)
         &\krs \prop{handle(-, x.x+1)}{raise(5)}\\
         &\krs \pop{\es}{(x+1)[x := 5]}\\
         &\krs \push{\es}{6}
-=======
-        &\pop{\es}{ct a} \\
-        &\br \pop{\es}{handle ctaux a with x => x + 1}\\
-        &\kr \pop{handle(-, x.x+1)}{ctaux a}\\
-        &\br \pop{handle(-, x.x+1)}{vand r (vand (ctaux i) (ctaux d))}\\
-        &\br \pop{handle(-, x.x+1)}{and bool\_panic r (bool\_panic (vand (ctaux i) (ctaux d)))}\\
-        &\kr \pop{and(-,(bool\_panic (vand (ctaux i) (ctaux d))));handle(-, x.x+1)}{and bool\_panic r }\\
->>>>>>> sandy
         \end{align*}
 
         \item \pt{1} Considere el siguiente programa, donde suponemos que el
@@ -246,17 +234,10 @@ e10 = if (isbool x) then x else raise(x)
 not letcc k2 in
     iszero(2 + letcc k1 in
         3  + if x = pred 8 then
-<<<<<<< HEAD
             4 * pred (continue k1 6
             else 5 * suc (continue k2 false)
         end
         )
-=======
-            	4 * pred (continue k1 6)
-             else 5 * suc (continue k2 false)
-          end
-    )
->>>>>>> sandy
     end
 end
         \end{minted}
@@ -269,18 +250,6 @@ end
 
             \item ¿A qué continuaciones se ligan las variables \tp{k1} y \tp{k2}?
 
-<<<<<<< HEAD
-            \[
-                \tp{k1 --> (continue k1 6)} 
-                \kr \tp{(continue (not(-), iszero(-), suma(2, -)) 6)}
-            \]
-
-            \[
-                \tp{k2 --> (continue k2 false)} 
-                \kr \tp{(continue (not(-)) false)}
-            \]
-
-=======
 			\[
 			\tx{k1 --> (continue k1 6)} 
 			\kr \tp{(continue (not(-), iszero(-), suma(2, -)), 6)}
@@ -291,7 +260,6 @@ end
 			\kr \tp{(continue (not(-)), false)}
 			\]
 			
->>>>>>> sandy
             \item ¿A qué se evalúa el programa para \tp{x = 7} y para \tp{x $\neq$ 7}?
      		
      		Evaluamos, considerando \tp{x = 7}
@@ -556,7 +524,6 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             desiciones de diseño del lenguaje, independientemente de la
             definición de la función.
 
-<<<<<<< HEAD
             Por ejemplo, con una expresión \tp{1+"2"}, ¿cuál es el tipo del
             resultado? Usando únicamente los principios básicos del subtipado, 
             ambos tipos serían correctos, lo que haría que una expresión tenga 
@@ -566,9 +533,6 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             los datos.
 
             \item \tp{String < Int} y \tp{+} sobrecargado
-=======
-            \item \tp{String $\leq$ Int} y \tp{+} sobrecargado
->>>>>>> sandy
 
             Considere
 
@@ -608,7 +572,6 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             Fuera de este inconveniente, todo respecto a los tipos se mantiene
             en regla.
 
-<<<<<<< HEAD
             \item \tp{Int < String} y \tp{=} sobrecargado
 
             El único caso donde se haría cohersión sería al tener una cadena y 
@@ -619,9 +582,6 @@ cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
             igualdad.
 
             No hay ningún aspecto inusual en este caso.
-=======
-            \item \tp{Int $\leq$ String} y \tp{=} sobrecargado
->>>>>>> sandy
             \item \tp{+} y \tp{=} sobrecargados
 
             Si suponemos que no se cumple que algún tipo es subtipo del otro,
