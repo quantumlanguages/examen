@@ -85,7 +85,7 @@ ct t = handle ctaux t with x => e
 Node (iszero 9) (Node False Void Void) (Node 5 Void Void)
         \end{minted}
 
-        en la máquina \tp{$\mathcal{K}$}.\\
+        en la máquina \tp{$\mathcal{K}$}.
 
         Puede omitir varios pasos pero no los que involucren el manejo de excepciones.
 
@@ -93,15 +93,15 @@ Node (iszero 9) (Node False Void Void) (Node 5 Void Void)
         función binaria \tp{vand} que realice la conjunción si sus argumentos
         son booleanos y en caso contrario lance una excepción adecuada de forma
         que sea manejada por \tp{e}. Puede suponer que existe una función unaria
-        \tp{isbool} que verifica si su argumento es o no un booleano.\\
+        \tp{isbool} que verifica si su argumento es o no un booleano.
 
         \tb{Solución:}
 
         Definiendo \tp{vand}.
 
         \begin{minted}{haskell}
--- Función auxiliar para mandar expeciones
-bool_panic p = if isbool then p else raise(p)
+-- Función auxiliar para mandar excepciones
+bool_panic p = let x = p in if isbool x then x else raise(x)
 
 -- Realiza la conjunción si sus argumentos son booleanos o lanza una
 -- excepción con el primer argumeto que no lo sea.
@@ -121,17 +121,65 @@ ctaux (Node r i d) = vand r (vand (ctaux i) (ctaux d))
 ct t = handle ctaux t with x => x + 1
         \end{minted}
 
+        Se definen algunos sinónimos para hacer más corta la evaluación
+
+        \begin{minted}{haskell}
+-- constantes
+f = False
+t = True
+-- arboles
+i = (Node False Void Void)
+d = (Node 5 Void Void)
+a = (Node (iszero 9) i d)
+-- expresiones booleanas simples
+p1 = iszero 9
+-- pilas
+s1 = and(-, e2), handle(-, x.x+1)
+s2 = and(f, -), handle(-, x.x+1)
+s3 = and(-, e7), let(-, x.e10), s2
+-- otras expresiones
+e3 = (vand (ctaux i) (ctaux d))
+e2 = bool-panic e3
+e4 = ctaux i
+e5 = (bool-panic (ctaux i))
+e6 = ctaux d
+e7 = (bool-panic (ctaux d))
+e6 = ctaux Void
+e8 = (vand e6 e6)
+e9 = bool-panic e8
+e10 = if (isbool x) then x else raise(x)
+        \end{minted}
+
         Ahora, vamos a evaluar la expresión:
 
         
         \begin{align*}
-        &\pop{\es}{ct Node (iszero 9) (Node False Void Void) (Node 5 Void Void)} \\
-        &\br \pop{\es}{handle (ctaux (Node False Void Void) (Node 5 Void Void)) with x => x + 1}\\
-        &\kr \pop{handle(-, x.x+1)}{ctaux (Node False Void Void) (Node 5 Void Void)}\\
-        &\br \pop{handle(-, x.x+1)}{and (bool-panic r) (vand (ctaux i) (ctaux d))}\\
-        &\krs \pop{and(False, -), handle(-, x.x+1)}{vand (ctaux i) (ctaux d)}\\
-        &\krs \pop{and(False, -), and(False, -), handle(-, x.x+1)}{bool-panic(ctaux d)}\\
-        &\krs \pop{isbool(-), if(-, ctaux d, raise(ctaux d))}{ctaux d}
+        % evaluando a
+        &\pop{\es}{ct a}\\
+        &\br \pop{\es}{handle ctaux a with x => x+1}\\
+        &\kr \pop{handle(-, x.x+1)}{ctaux a}\\
+        &\br \pop{handle(-, x.x+1)}{and (bool-panic p1) e2}\\
+        &\kr \pop{and(-, e2), handle(-, x.x+1)}{bool-panic p1}\\
+        &\br \pop{s1}{let x = p1 in e10}\\
+        &\kr \pop{let(-, x.e10), s1}{iszero 9}\\
+        &\krs \push{let(-, e10), s1}{f}\\
+        &\kr \pop{s1}{if isbool x then x else raise(x) [x := f]}\\
+        &\krs \push{and(-, e2), handle(-, x.x+1)}{f}\\
+        % evaluando los hijos
+        &\kr \pop{and(f, -), handle(-, x.x+1)}{bool-panic e3}\\
+        &\br \pop{s2}{let x = e3 in e10}\\
+        &\kr \pop{let(-, x.e10), s2}{e3}\\
+        &\br \pop{let(-, x.e10), s2}{and e5 e7}\\
+        % evaluando el subárbol derecho
+        &\kr \pop{and(-, e7), let(-, x.e10), s2}{e5}\\
+        &\br \pop{s3}{let x = e4 in e10}\\
+        &\kr \pop{let(-, e10), s3}{e4}\\
+        &\br \pop{let(-, e10), s3}{and (bool-panic f) e9}\\
+        &\kr \pop{and(-, e9), let(-, e10), s3}{bool-panic f}\\
+        &\br \pop{and(-, e9), let(-, e10), s3}{let x = f in e10}\\
+        &\krs \push{and(-, e9), let(-, e10), s3}{f}\\
+        &\kr \pop{and(f, -), let(-, e10), s3}{e9}\\
+        &\br \pop{and(f, -), let(-, e10), s3}{let x = e8 in e10}\\
         \end{align*}
 
         \item \pt{1} Considere el siguiente programa, donde suponemos que el
@@ -142,8 +190,8 @@ ct t = handle ctaux t with x => x + 1
 not letcc k2 in
     iszero(2 + letcc k1 in)
         3  + if x = pred 8 then
-            4 * pred (continue k2 6)
-            else 5 * suc (continue k1 false)
+            4 * pred (continue k1 6
+            else 5 * suc (continue k2 false)
         end
         )
     end
@@ -159,7 +207,13 @@ end
             \item ¿A qué continuaciones se ligan las variables \tp{k1} y \tp{k2}?
 
             \[
-                \tp{k1 --> (continue k1 6)} \quad \tp{k2 --> (continue k2 False)}
+                \tp{k1 --> (continue k1 6)} 
+                \kr \tp{(continue (not(-), iszero(-), suma(2, -)) 6)}
+            \]
+
+            \[
+                \tp{k2 --> (continue k2 false)} 
+                \kr \tp{(continue (not(-)) false)}
             \]
 
             \item ¿A qué se evalúa el programa para \tp{x = 7} y para \tp{x $\neq$ 7}?
@@ -211,8 +265,6 @@ cpsN 5 k = cpsf 4 (\v1 -> cpsg y (\v2 -> k(22 + v1 + 33+ v2)))
 
 cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
 		\end{minted}
-
-		$ $\\
 
         \item \pt{1.5} Considere las siguientes cuatro caracterísiticas para un
         lenguaje de programación.
