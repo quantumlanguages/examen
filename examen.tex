@@ -1,8 +1,9 @@
-% type 
+% type
 \documentclass{article}
 
 % page format
 \usepackage[letterpaper, margin=1.5cm]{geometry}
+\usepackage[utf8]{inputenc}
 
 % font
 \renewcommand{\familydefault}{\sfdefault}
@@ -28,7 +29,8 @@
 \usemintedstyle{manni}
 
 % shortcuts
-\newcommand{\tx}[1]{\textcolor{CadetBlue} {\texttt{#1}}}
+\newcommand{\tx}[1]{\textcolor{Black} {\texttt{#1}}}
+\newcommand{\tp}[1]{\textcolor{CadetBlue} {\texttt{#1}}}
 \newcommand{\tb}[1]{\textcolor{RoyalPurple} {\textbf{#1}}}
 \newcommand{\ti}[1]{\textcolor{RoyalPurple} {\textit{#1}}}
 \newcommand{\pt}[1]{\textcolor{RoyalPurple}{(#1pt)}}
@@ -62,503 +64,510 @@
     % header
     \maketitle
 
-    \tb{Esta tarea vale 8 puntos sobre el parcial 4, la calificación se 
+    \tb{Esta tarea vale 8 puntos sobre el parcial 4, la calificación se
     completa con una pregunta presencial el 29 de noviembre de 2019}
 
     \begin{enumerate}
-        \item \pt{1} Se desea implementar una función \tx{ct} que reciba un 
-        árbol heterogéneo de naturales o booleanos y devuelva la conjunción de 
-        sus elementos siempre y cuando todos sean booleanos y en otro caso 
-        devuelva el valor \tx{n+1}, donde \tx{n} es el primer natural encontrado en el
-        árbol. Para este propósito defina una función \tx{ctaux} y una expresión
-        \tx{e} tal que la función \tx{ct} quede implementada como
-        
+        \item \pt{1} Se desea implementar una función \tp{ct} que reciba un
+        árbol heterogéneo de naturales o booleanos y devuelva la conjunción de
+        sus elementos siempre y cuando todos sean booleanos y en otro caso
+        devuelva el valor \tp{n+1}, donde \tp{n} es el primer natural encontrado en el
+        árbol. Para este propósito defina una función \tp{ctaux} y una expresión
+        \tp{e} tal que la función \tp{ct} quede implementada como
+
         \begin{minted}{haskell}
-            ct t = handle ctaux t with x => e
+ct t = handle ctaux t with x => e
         \end{minted}
 
         Bosqueje la evaluación de la expresión
 
         \begin{minted}{haskell}
-            Node (iszero 9) (Node False Void Void) (Node 5 Void Void)
+Node (iszero 9) (Node False Void Void) (Node 5 Void Void)
         \end{minted}
 
-        en la máquina \tx{$\mathcal{K}$}.
+        en la máquina \tp{$\mathcal{K}$}.\\
 
-        Puede omitir varios pasos pero no los que involucren el manejo de 
-        excepciones.
+        Puede omitir varios pasos pero no los que involucren el manejo de excepciones.
 
-        \ti{Sugerencia:} Es más fácil si define \tx{ctaux} a partir de una
-        función binaria \tx{vand} que realice la conjunción si sus argumentos
+        \ti{Sugerencia:} Es más fácil si define \tp{ctaux} a partir de una
+        función binaria \tp{vand} que realice la conjunción si sus argumentos
         son booleanos y en caso contrario lance una excepción adecuada de forma
-        que sea manejada por \tx{e}. Puede suponer que existe una función unaria 
-        \tx{isbool} que verifica si su argumento es o no un booleano.
+        que sea manejada por \tp{e}. Puede suponer que existe una función unaria
+        \tp{isbool} que verifica si su argumento es o no un booleano.\\
 
         \tb{Solución:}
 
-        Definiendo \tx{vand}.
+        Definiendo \tp{vand}.
 
         \begin{minted}{haskell}
-            -- Función auxiliar para mandar expeciones
-            bool_panic p = if isbool then p else raise(p)
+-- Función auxiliar para mandar expeciones
+bool_panic p = if isbool then p else raise(p)
 
-            -- Realiza la conjunción si sus argumentos son booleanos o lanza una
-            -- excepción con el primer argumeto que no lo sea.
-            vand p q = and (bool_panic p) (bool_panic q)
+-- Realiza la conjunción si sus argumentos son booleanos o lanza una
+-- excepción con el primer argumeto que no lo sea.
+vand p q = and (bool_panic p) (bool_panic q)
         \end{minted}
 
-        Ahora, hay que usar esta función para definir \tx{ctaux}.
+        Ahora, hay que usar esta función para definir \tp{ctaux}.
 
         \begin{minted}{haskell}
-            ctaux Void = True
-            ctaux (Node r i d) = vand r (vand (ctaux i) (ctaux d))
+ctaux Void = True
+ctaux (Node r i d) = vand r (vand (ctaux i) (ctaux d))
         \end{minted}
 
-        Y usando esto, se define \tx{ct} como 
+        Y usando esto, se define \tp{ct} como
 
         \begin{minted}{haskell}
-            ct t = handle ctaux t with x => x + 1
+ct t = handle ctaux t with x => x + 1
         \end{minted}
 
-        Ahora, para evaluar la expresión, es útil definir lo siguiente
+        Ahora, vamos a evaluar la expresión:
 
-            
+        
         \begin{align*}
-            &\tx{a = Node (iszero 9) (Node False Void Void) (Node 5 Void Void)} \\
-            &\tx{r = iszero 9}\\
-            &\tx{i = Node False Void Void}\\
-            &\tx{d = Node 5 Void Void}
+        &\pop{\es}{ct Node (iszero 9) (Node False Void Void) (Node 5 Void Void)} \\
+        &\br \pop{\es}{handle (ctaux (Node False Void Void) (Node 5 Void Void)) with x => x + 1}\\
+        &\kr \pop{handle(-, x.x+1)}{ctaux (Node False Void Void) (Node 5 Void Void)}\\
+        &\br \pop{handle(-, x.x+1)}{and (bool-panic r) (vand (ctaux i) (ctaux d))}\\
+        &\krs \pop{and(False, -), handle(-, x.x+1)}{vand (ctaux i) (ctaux d)}\\
+        &\krs \pop{and(False, -), and(False, -), handle(-, x.x+1)}{bool-panic(ctaux d)}\\
+        &\krs \pop{isbool(-), if(-, ctaux d, raise(ctaux d))}{ctaux d}
         \end{align*}
 
-        Ahora, para evaluar
-
-        \begin{align*}
-            &\pop{\es}{ct a} \\
-            &\br \pop{\es}{handle (ctaux a) with x => x + 1}\\
-            &\kr \pop{handle(-, x.x+1)}{ctaux a}\\
-            &\br \pop{handle(-, x.x+1)}{and (bool-panic r) (vand (ctaux i) (ctaux d))}\\
-            &\krs \pop{and(False, -), handle(-, x.x+1)}{vand (ctaux i) (ctaux d)}\\
-            &\krs \pop{and(False, -), and(False, -), handle(-, x.x+1)}{bool-panic(ctaux d)}\\
-            &\krs \pop{isbool(-), if(-, ctaux d, raise(ctaux d))}{ctaux d}
-        \end{align*}
-
-        \item \pt{1} Considere el siguiente programa, donde suponemos que el 
-        lenguaje contiene un operador primitivo \tx{not} para la negación 
+        \item \pt{1} Considere el siguiente programa, donde suponemos que el
+        lenguaje contiene un operador primitivo \tp{not} para la negación
         booleana.
 
         \begin{minted}{haskell}
-            not letcc k2 in
-                iszero(2 + letcc k1 in)
-                    3  + if x = pred 8 then 
-                        4 * pred (continue k2 6) 
-                        else 5 * suc (continue k1 false)
-                    end
-                    )
-                end
-            end
+not letcc k2 in
+    iszero(2 + letcc k1 in)
+        3  + if x = pred 8 then
+            4 * pred (continue k2 6)
+            else 5 * suc (continue k1 false)
+        end
+        )
+    end
+end
         \end{minted}
         \begin{enumerate}
-            \item ¿Cuáles son los tipos de \tx{k1} y \tx{k2}?
+            \item ¿Cuáles son los tipos de \tp{k1} y \tp{k2}?
 
             \[
                 \tx{k1 : Cont(Integer)} \quad \tx{k2 : Cont(Bool)}
             \]
 
-            \item ¿A qué continuaciones se ligan las variables \tx{k1} y 
-            \tx{k2}?
+            \item ¿A qué continuaciones se ligan las variables \tp{k1} y \tp{k2}?
 
             \[
-                \tx{k1 --> (continue k1 6)} \quad \tx{k2 --> (continue k2 False)}
+                \tp{k1 --> (continue k1 6)} \quad \tp{k2 --> (continue k2 False)}
             \]
 
-            \item ¿A qué se evalua el programa para \tx{x = 7} y para 
-            \tx{x $\neq$ 7}?
+            \item ¿A qué se evalúa el programa para \tp{x = 7} y para \tp{x $\neq$ 7}?
 
             \[
-                \tx{e[x := 7]} \krs \tx{True}, \quad \tx{e[x /= 7]} \krs \tx{True}
+                \tp{e[x := 7]} \krs \tp{True}, \quad \tp{e[x /= 7]} \krs \tp{True}
             \]
         \end{enumerate}
 
-        \item \pt{1.5} Considere la siguiente función \tx{N} que depende de
-        ciertas funciones dadas \tx{f, g, h}.
+        \item \pt{1.5} Considere la siguiente función \tp{N} que depende de
+        ciertas funciones dadas \tp{f, g, h}.
 
         \begin{minted}{haskell}
-            N 0 = 17
+N 0 = 17
 
-            N 1 = f (1 + 13)
+N 1 = f (1 + 13)
 
-            N 2 = 22 + (2-3) + 2
+N 2 = 22 + (2-3) + 2
 
-            N 3 = 22 + (f 3) + 37
+N 3 = 22 + (f 3) + 37
 
-            N 4 = g 22 (f 4)
+N 4 = g 22 (f 4)
 
-            N 4 = 22 + (f 4) + 33 + (g y)
+N 4 = 22 + (f 4) + 33 + (g y)
 
-            N x = h (f x) (44 - y) (g y)
+N x = h (f x) (44 - y) (g y)
         \end{minted}
 
-        Defina la versión \tx{cps} de \tx{N}, denotada por \tx{cpsN}. Para esto,
-        puede suponer definidas las versiones \tx{cps} de \tx{f, g, h},
-        denotadas por \tx{cpsf, cpsg, cpsh}.
+        Defina la versión \tp{cps} de \tp{N}, denotada por \tp{cpsN}. Para esto,
+        puede suponer definidas las versiones \tp{cps} de \tp{f, g, h},
+        denotadas por \tp{cpsf, cpsg, cpsh}.
 
         \ti{Atención:} Las operaciones aritméticas deben permanecer sin cambios.
-        Es decir, no se piden las versiones \tx{cps} de \tx{+, -}.
+        Es decir, no se piden las versiones \tp{cps} de \tp{+, -}.
 
-        \item \pt{1.5} Considere las siguientes cuatro caracterísiticas para un 
+		\tb{Solución}
+		\begin{minted}{haskell}
+cpsN 0 k = 17
+
+cpsN 1 k = cpsf (1 + 13) (\v -> k v)
+
+cpsN 2 k = k (22 + (2-3) + 2)
+
+cpsN 3 k = cpsf 3 (\v -> k (22 + v + 37))
+
+cpsN 4 k = cpsg 22 (\v1 -> cpsf 4 (\v2 -> k(v1 + v2))
+
+cpsN 5 k = cpsf 4 (\v1 -> cpsg y (\v2 -> k(22 + v1 + 33+ v2)))
+
+cpsN x k = cpsf x (\v1 -> cpsg y (\v2 -> cpsh v1 (44 -y) v2 (\v3 -> k v3)))
+		\end{minted}
+
+		$ $\\
+
+        \item \pt{1.5} Considere las siguientes cuatro caracterísiticas para un
         lenguaje de programación.
 
         \begin{enumerate}
-            \item Existe un tipo de cadena \tx{String} y se cumple 
-            \tx{Int $\leq$ String} mediante una conversión implícita que 
-            transforma a un entero en una cadena. 
+            \item Existe un tipo de cadena \tp{String} y se cumple
+            \tp{Int $\leq$ String} mediante una conversión implícita que
+            transforma a un entero en una cadena.
 
-            Por ejemplo, \tx{123} a \tx{"123"}.
+            Por ejemplo, \tp{123} a \tp{"123"}.
 
-            \item Existe un tipo cadena \tx{String} que cumple que 
-            \tx{String $\leq$ Int} mediante una conversión implícita que 
+            \item Existe un tipo cadena \tp{String} que cumple que
+            \tp{String $\leq$ Int} mediante una conversión implícita que
             transforma cadenas a enteros ignorado los caractéres que no sean
-            dígitos, excepto por el caracter inicial \tx{-}.
+            dígitos, excepto por el caracter inicial \tp{-}.
 
-            Por ejemplo, \tx{"}\tx{-0aw23r4"} corresponde a \tx{-234}.
+            Por ejemplo, \tp{"}\tp{-0aw23r4"} corresponde a \tp{-234}.
 
-            \item Existe un operador binario \tx{+} que denota a ambas la suma 
+            \item Existe un operador binario \tp{+} que denota a ambas la suma
             de enteros y la concatenación de cadenas.
 
-            \item Existe un operador binario \tx{=} que denota a ambas la 
+            \item Existe un operador binario \tp{=} que denota a ambas la
             igualdad de enteros y de cadenas.
         \end{enumerate}
 
-        Para cada par de estas caracterísiticas, discuta si se violan o no los 
+        Para cada par de estas caracterísiticas, discuta si se violan o no los
         principios fundamentales del subtipado. En caso afirmativo escriba un
-        ejemplo de un programa simple que cause un comprotamiento ambigüo o 
+        ejemplo de un programa simple que cause un comprotamiento ambigüo o
         contrainituitivo.
 
         \begin{itemize}
-            \item \tx{String < Int} e \tx{Int < String}
+            \item \tp{String < Int} e \tp{Int < String}
 
-            Si se tiene algún operador \tx{*} sobrecargado (como en los demás 
+            Si se tiene algún operador \tp{*} sobrecargado (como en los demás
             casos), entonces podría existir amigüedad en la operación.
 
             ¿Cuál de los dos valores debería recibir el casting?
 
             En una implementación se podría resolver fijando un elemento como el
-            tipo por omisión para estos caso, pero significaría que la función 
+            tipo por omisión para estos caso, pero significaría que la función
             podría dar diferentes valores en ciertas condiciones dependiendo las
             desiciones de diseño del lenguaje, independientemente de la
             definición de la función.
 
-            \item \tx{String < Int} y \tx{+} sobrecargado
+            \item \tp{String < Int} y \tp{+} sobrecargado
 
             Considere
 
             \begin{minted}{haskell}
-                ("1"+"1")+1 = 12
-                "1"+("1"+1) = 3
+("1"+"1")+1 = 12
+"1"+("1"+1) = 3
             \end{minted}
 
-            Es es que \tx{+} ya no sería asociativa, lo cuál sí cumpliría si
-            \tx{String $\not <$ Int}.
+            Es es que \tp{+} ya no sería asociativa, lo cuál sí cumpliría si
+            \tp{String $\not <$ Int}.
 
-            \item \tx{String < Int} y \tx{=} sobrecargado
+            \item \tp{String < Int} y \tp{=} sobrecargado
 
             Considere
 
             \begin{minted}{haskell}
-                "1q" = 1
-                1 = "1e"
-                "1q" /= "1e"
+"1q" = 1
+1 = "1e"
+"1q" /= "1e"
             \end{minted}
 
             Es decir, la igualdad ya no es transitiva, lo cuál es chocante
             porque ya no sería una relación de equivalencia.
 
-            \item \tx{Int < String} y \tx{+} sobrecargado
+            \item \tp{Int < String} y \tp{+} sobrecargado
 
             Considere
 
             \begin{minted}{haskell}
-                (1+2)+"a" = "3a"
-                1+(2+"a") = "12a"
+(1+2)+"a" = "3a"
+1+(2+"a") = "12a"
             \end{minted}
 
-            Es es que \tx{+} ya no sería asociativa, lo cuál sí cumpliría si
-            \tx{Int $\not <$ String}.
+            Es es que \tp{+} ya no sería asociativa, lo cuál sí cumpliría si
+            \tp{Int $\not <$ String}.
 
-            Fuera de este inconveniente, todo respecto a los tipos se mantiene 
+            Fuera de este inconveniente, todo respecto a los tipos se mantiene
             en regla.
 
-            \item \tx{Int < String} y \tx{=} sobrecargado
-            \item \tx{+} y \tx{=} sobrecargados
+            \item \tp{Int < String} y \tp{=} sobrecargado
+            \item \tp{+} y \tp{=} sobrecargados
         \end{itemize}
 
-        \item \pt{1} Usando la definición de números naturales en 
-        \tx{Java Peso Pluma} vista en clase.
+        \item \pt{1} Usando la definición de números naturales en
+        \tp{Java Peso Pluma} vista en clase.
 
         \begin{enumerate}
-            \item Agregue un método \tx{pot} y \tx{leq} para las operaciones de
-            potencia y el orden \tx{$\leq$}.
+            \item Agregue un método \tp{pot} y \tp{leq} para las operaciones de
+            potencia y el orden \tp{$\leq$}.
 
             \tb{Solución:}
 
             \begin{minted}[mathescape]{java}
-                // Clase de naturales definida en las notas
-                class Nat extends Object {
-                    Object p;
+// Clase de naturales definida en las notas
+class Nat extends Object {
+    Object p;
 
-                    Nat (Object n) { super(); this.p = n;}
+    Nat (Object n) { super(); this.p = n;}
 
-                    Nat suc() { return new Nat(this); }
+    Nat suc() { return new Nat(this); }
 
-                    Nat pred() { return (Nat) this.p; }
+    Nat pred() { return (Nat) this.p; }
 
-                    Nat suma(Nat n) { return this.pred().sum(n.suc());}
+    Nat suma(Nat n) { return this.pred().sum(n.suc());}
 
-                    Nat multi(Nat n) { return n.suma(this.pred().multi(n));}
+    Nat multi(Nat n) { return n.suma(this.pred().multi(n));}
 
-                    /** método 'pot'
-                    * @param Nat n exponente al que se va a elevar la potencia.
-                    * @return $this^n$
-                    */
-                    Nat pot(Nat n) { return n.flipPot(this) }
+    /** método 'pot'
+    * @param Nat n exponente al que se va a elevar la potencia.
+    * @return $this^n$
+    */
+    Nat pot(Nat n) { return n.flipPot(this) }
 
-                    /** método auxiliar para calcular 'pot'
-                    * @param Nat n base del números del que $this$ es exponente.
-                    * @return $n^{this}$
-                    */
-                    Nat flipPot(Nat n) {return n.multi(this.pred().flipPot(n))}
+    /** método auxiliar para calcular 'pot'
+    * @param Nat n base del números del que $this$ es exponente.
+    * @return $n^{this}$
+    */
+    Nat flipPot(Nat n) {return n.multi(this.pred().flipPot(n))}
 
-                    /** método 'leq'
-                    * $this \leq n \iff this \not > n \iff n \not < this$
-                    * @param Nat n Número a comparar con $this$.
-                    * @return $this \leq n$
-                    */
-                    Boolean leq(Nat n) {return n.lt(this).not();}
+    /** método 'leq'
+    * $this \leq n \iff this \not > n \iff n \not < this$
+    * @param Nat n Número a comparar con $this$.
+    * @return $this \leq n$
+    */
+    Boolean leq(Nat n) {return n.lt(this).not();}
 
-                    /** método auxiliar para calcular 'leq'
-                    * $this < n \iff 0 < n - this$
-                    * @param Nat n Número a comparar con $this$.
-                    * @return $this < n$
-                    */
-                    Boolean lt(Nat n) {return this.pred().lt(n.pred());}
+    /** método auxiliar para calcular 'leq'
+    * $this < n \iff 0 < n - this$
+    * @param Nat n Número a comparar con $this$.
+    * @return $this < n$
+    */
+    Boolean lt(Nat n) {return this.pred().lt(n.pred());}
 
-                    // método auxiliar para calcular 'not' en Boolean
-                    Nat inv() {return new Cero(this);}
+    // método auxiliar para calcular 'not' en Boolean
+    Nat inv() {return new Cero(this);}
 
-                }
+}
 
-                // Clase del Cero definida en las notas
-                class Cero extends Nat {
-                    Cero (Object n) {super(n);}
+// Clase del Cero definida en las notas
+class Cero extends Nat {
+    Cero (Object n) {super(n);}
 
-                    Nat pred() {return this;}
+    Nat pred() {return this;}
 
-                    Nat suma(Nat n) {return n;}
+    Nat suma(Nat n) {return n;}
 
-                    Nat multi(Nat n) {return this;}
+    Nat multi(Nat n) {return this;}
 
-                    /** calcular el caso base del método auxiliar 'flipPot'
-                    * @param Nat n número del que $this$ es exponente.
-                    * @return $n^0 = 1 = suc(0) = this.suc()$
-                    */
-                    Nat flipPot(Nat n) {return this.suc();}
+    /** calcular el caso base del método auxiliar 'flipPot'
+    * @param Nat n número del que $this$ es exponente.
+    * @return $n^0 = 1 = suc(0) = this.suc()$
+    */
+    Nat flipPot(Nat n) {return this.suc();}
 
-                    /** calcular el caso base del método auxiliar 'lt'
-                    * $0 < n \iff bool(n) = True$
-                    * @param Nat n número a comparar
-                    * @return $this < n$
-                    */
-                    Booelan lt(Nat n) {return new Boolean(n);}
+    /** calcular el caso base del método auxiliar 'lt'
+    * $0 < n \iff bool(n) = True$
+    * @param Nat n número a comparar
+    * @return $this < n$
+    */
+    Booelan lt(Nat n) {return new Boolean(n);}
 
-                    // método auxiliar para calcular 'not' en Boolean
-                    Nat inv() {return this.suc();}
-                }
-            \end{minted}
+    // método auxiliar para calcular 'not' en Boolean
+    Nat inv() {return this.suc();}
+}
+        \end{minted}
 
-            Donde \tx{not} está definido como
+        Donde \tp{not} está definido como
 
-            \begin{minted}{java}
-                class Boolean extends Object {
-                    ...
-                    Boolean not() {return new Boolean(this.m.inv());}
-                }
-            \end{minted}
+        \begin{minted}{java}
+class Boolean extends Object {
+    ...
+    Boolean not() {return new Boolean(this.m.inv());}
+}
+        \end{minted}
 
-            \item Modele la clase \tx{Boolean} para el manejo de valores
+            \item Modele la clase \tp{Boolean} para el manejo de valores
             booleanos
             \begin{itemize}
-                \item La clase debe extender de \tx{Object}
+                \item La clase debe extender de \tp{Object}
 
-                \item El constructor recibirá un objeto de la clase \tx{Nat}
-                para definir su valor. \tx{0} representa \tx{true} y \tx{1}
-                representa \tx{true}.
+                \item El constructor recibirá un objeto de la clase \tp{Nat}
+                para definir su valor. \tp{0} representa \tp{true} y \tp{1}
+                representa \tp{true}.
 
-                \item Debe tener métodos \tx{true} y \tx{false} que regresen una
-                instancia de \tx{Boolean} según el caso.
-            \end{itemize} 
+                \item Debe tener métodos \tp{true} y \tp{false} que regresen una
+                instancia de \tp{Boolean} según el caso.
+            \end{itemize}
 
             \tb{Solución:}
             \begin{minted}{java}
-                class Boolean extends Object {
-                    Nat m;
+class Boolean extends Object {
+    Nat m;
 
-                    Boolean (Nat n) { super(); this.m = n;}
+    Boolean (Nat n) { super(); this.m = n;}
 
-                    Boolean true() { return new Boolean (new Cero(this).suc());}
+    Boolean true() { return new Boolean (new Cero(this).suc());}
 
-                    Boolean false() { return new Boolean (new Cero(this));}
+    Boolean false() { return new Boolean (new Cero(this));}
 
-                    Boolean not() { return new Boolean(this.m.inv());}
-                }
+    Boolean not() { return new Boolean(this.m.inv());}
+}
             \end{minted}
         \end{enumerate}
-        
-        \item \pt{2} Definina el siguiente lenguaje \tx{MinEAB}
+
+        \item \pt{2} Definina el siguiente lenguaje \tp{MinEAB}
 
         \begin{minted}{haskell}
-            e ::= n | true | false | e + e | e < e
+e ::= n | true | false | e + e | e < e
         \end{minted}
 
-        en \tx{Java Peso Pluma}.
+        en \tp{Java Peso Pluma}.
 
         Hay que seguir los siguientes pasos
 
         \begin{enumerate}
-            \item Defina una clase \tx{Expr} que incluya los siguientes métodos
+            \item Defina una clase \tp{Expr} que incluya los siguientes métodos
 
             \begin{itemize}
-                \item \tx{isAtom} que devuelve \tx{true} si la expresión no
+                \item \tp{isAtom} que devuelve \tp{true} si la expresión no
                 tiene subexpresiones propias.
 
-                \item \tx{lsub} que devuelve la subexpresión izquierda de una
+                \item \tp{lsub} que devuelve la subexpresión izquierda de una
                 expresión no atómica.
 
-                \item \tx{rsub} que devuelve la subexpresión derecah de una
+                \item \tp{rsub} que devuelve la subexpresión derecah de una
                 expresión no atómica.
 
-                \item \tx{eval} que devuelve el valor de la expresión.
+                \item \tp{eval} que devuelve el valor de la expresión.
             \end{itemize}
 
-            Esta clase debe ser abstracta en el sentido de que no tiene 
-            atributos y por lo tanto sus métodos no tiene cuerpo. Es una 
+            Esta clase debe ser abstracta en el sentido de que no tiene
+            atributos y por lo tanto sus métodos no tiene cuerpo. Es una
             interfaz.
 
             \tb{Solución:}
 
             \begin{minted}{java}
-                class Expr extends Object {
+class Expr extends Object {
 
-                    Boolean isAtom() {return error;}
+    Boolean isAtom() {return error;}
 
-                    Expr lsub() {return error;}
+    Expr lsub() {return error;}
 
-                    Expr rsub() {return error;}
+    Expr rsub() {return error;}
 
-                    Expr eval() {return error;}
-                }
+    Expr eval() {return error;}
+}
             \end{minted}
 
-            \item Defina las siguientes clases que implemente a \tx{Expr}
-            
+            \item Defina las siguientes clases que implemente a \tp{Expr}
+
             \begin{itemize}
-                \item \tx{NumExpr} que implemente los métodos para manejar 
+                \item \tp{NumExpr} que implemente los métodos para manejar
                 números.
 
                 \tb{Solución:}
 
                 \begin{minted}{java}
-                    class NumExpr extends Expr {
-                        Nat v;
+class NumExpr extends Expr {
+    Nat v;
 
-                        NumExpr(Nat w) {super(); this.v = w;}
+    NumExpr(Nat w) {super(); this.v = w;}
 
-                        Boolean isAtom() {return  (new Boolean(v)).true();}
+    Boolean isAtom() {return  (new Boolean(v)).true();}
 
-                        Expr eval() {return this;}
-                    }
+    Expr eval() {return this;}
+}
                 \end{minted}
 
-                \item \tx{BoolExpr} que implemente los métodos para manejar 
+                \item \tp{BoolExpr} que implemente los métodos para manejar
                 booleanos.
 
                 \tb{Solución:}
 
                 \begin{minted}{java}
-                    class BoolExpr extends Expr {
-                        Boolean v;
+class BoolExpr extends Expr {
+    Boolean v;
 
-                        BoolExpr(Boolean v) {super(); this.v = v;}
+    BoolExpr(Boolean v) {super(); this.v = v;}
 
-                        Boolean isAtom() {return this.v.true();}
+    Boolean isAtom() {return this.v.true();}
 
-                        Expr eval() {return this;}
-                    }
+    Expr eval() {return this;}
+}
                 \end{minted}
 
-                \item \tx{SumExpr} que implemente los métodos para manejar 
+                \item \tp{SumExpr} que implemente los métodos para manejar
                 sumas.
 
                 \tb{Solución:}
 
                 \begin{minted}{java}
-                    class SumExpr extends Expr {
-                        Expr i;
-                        Expr d;
+class SumExpr extends Expr {
+    Expr i;
+    Expr d;
 
-                        SumExpr(Expr e1, Expr e2) {super(); this.i = e1; this.d = e2}
+    SumExpr(Expr e1, Expr e2) {super(); this.i = e1; this.d = e2}
 
-                        Boolean isAtom() {return (new Booelan(new Cero(this))).false();}
+    Boolean isAtom() {return (new Booelan(new Cero(this))).false();}
 
-                        Expr eval() {return new NumExpr(this.i.eval().v.suma(this.d.eval().v));}
-                    }
+    Expr eval() {return new NumExpr(this.i.eval().v.suma(this.d.eval().v));}
+}
                 \end{minted}
 
-                \item \tx{LTExpr} que implemente los métodos para manejar 
+                \item \tp{LTExpr} que implemente los métodos para manejar
                 comparaciones de orden.
 
                 \tb{Solución:}
 
                 \begin{minted}{java}
-                    class LTExpr extends Expr {
-                        Expr i;
-                        Expr d;
+class LTExpr extends Expr {
+    Expr i;
+    Expr d;
 
-                        LTExpr(Expr e1, Expr e2) {super(); this.i = e1; this.d = e2}
+    LTExpr(Expr e1, Expr e2) {super(); this.i = e1; this.d = e2}
 
-                        Boolean isAtom() {return (new Boolean(new Cero(this))).false();}
+    Boolean isAtom() {return (new Boolean(new Cero(this))).false();}
 
-                        Expr eval() {return new BoolExpr(this.i.eval().v.lt(this.d.eval().v));}
-                    }
+    Expr eval() {return new BoolExpr(this.i.eval().v.lt(this.d.eval().v));}
+}
                 \end{minted}
 
             \end{itemize}
 
-            \item Dé ejemplos de instancias de cada una de las clases 
+            \item Dé ejemplos de instancias de cada una de las clases
             anteriores.
 
             \begin{minted}{java}
-                // Cero
-                Nat cero = new Cero(this);
+// Cero
+Nat cero = new Cero(this);
 
-                // NumExpr
-                NumExpr ceroE = new NumExpr(cero);
+// NumExpr
+NumExpr ceroE = new NumExpr(cero);
 
-                // BoolExpr
-                BoolExpr falseE = new BoolExpr(new Boolean(cero));
+// BoolExpr
+BoolExpr falseE = new BoolExpr(new Boolean(cero));
 
-                // SumExpr
-                SumExpr sumCE = new SumExpr(ceroE, ceroE);
+// SumExpr
+SumExpr sumCE = new SumExpr(ceroE, ceroE);
 
-                // LTExpr
-                LTExpr lC = new lteXPR(ceroE, ceroE);
+// LTExpr
+LTExpr lC = new lteXPR(ceroE, ceroE);
             \end{minted}
 
-            \item Extienda \tx{MinEAB} con las expresiones \tx{-e, iszero e}.
+            \item Extienda \tp{MinEAB} con las expresiones \tp{-e, iszero e}.
 
             Con esta nueva definición, cree las siguientes clases
-            
+
             \begin{itemize}
-                \item \tx{NegExpr}
+                \item \tp{NegExpr}
 
                 \tb{Solución:}
 
@@ -566,177 +575,177 @@
                 enteros.
 
                 \begin{minted}[mathescape]{java}
-                    // definición de enteros usando naturales
-                    // parejas de aturales cuya diferencia indica el número a 
-                    // representar.
-                    // $n \in \mathbb{N}$
-                    // $n \mapsto (n, 0)$
-                    // $-n \mapsto (0, n)$
-                    class Int extends Object {
-                        Nat i;
-                        Nat d;
+// definición de enteros usando naturales
+// parejas de aturales cuya diferencia indica el número a
+// representar.
+// $n \in \mathbb{N}$
+// $n \mapsto (n, 0)$
+// $-n \mapsto (0, n)$
+class Int extends Object {
+    Nat i;
+    Nat d;
 
-                        // $\mathbb{Z} \cong \mathbb{N}^2$
-                        Int(Nat i, Nat d) {super(); this.i = i; this.d = d;}
+    // $\mathbb{Z} \cong \mathbb{N}^2$
+    Int(Nat i, Nat d) {super(); this.i = i; this.d = d;}
 
-                        // $(x, y) +_{\mathbb{Z}} (z, w) = (x+_{\mathbb{N}}y, z+_{\mathbb{N}}w)$
-                        Int suma(Int n) {return new Int(this.i.suma(n.i), this.d.suma(n.d));}
+    // $(x, y) +_{\mathbb{Z}} (z, w) = (x+_{\mathbb{N}}y, z+_{\mathbb{N}}w)$
+    Int suma(Int n) {return new Int(this.i.suma(n.i), this.d.suma(n.d));}
 
-                        // $(x, y) \leq_{\mathbb{Z}} (z, w) \iff xz \leq_{\mathbb{N}} yz$
-                        Boolean lt(Int n) {return this.i.suma(n.d).lt(n.i.suma(this.d));}
+    // $(x, y) \leq_{\mathbb{Z}} (z, w) \iff xz \leq_{\mathbb{N}} yz$
+    Boolean lt(Int n) {return this.i.suma(n.d).lt(n.i.suma(this.d));}
 
-                        // $-(a, b) = (b, a)$
-                        Int neg() {return new Int(this.d, this.i);}
-                    }
+    // $-(a, b) = (b, a)$
+    Int neg() {return new Int(this.d, this.i);}
+}
                 \end{minted}
 
-                Hay que modificar la clase de \tx{NumExpr} para manejar enteros
+                Hay que modificar la clase de \tp{NumExpr} para manejar enteros
                 \begin{minted}{java}
-                    // modificaciones para manejar enteros
-                    class NumExpr extends Expr {
-                        Int v;
+// modificaciones para manejar enteros
+class NumExpr extends Expr {
+    Int v;
 
-                        NumExpr(Int v) {super(); this.v = v;}
-                        ...
-                    }
+    NumExpr(Int v) {super(); this.v = v;}
+    ...
+}
                 \end{minted}
 
-                Y con estas nuevas modificaciones se define \tx{NegExpr}
+                Y con estas nuevas modificaciones se define \tp{NegExpr}
                 \begin{minted}{java}
-                    // manejar expresiones con negativos
-                    class NegExpr extends Expr {
-                        Expr e;
+// manejar expresiones con negativos
+class NegExpr extends Expr {
+    Expr e;
 
-                        NegExpr(Expr e) {this.e = e;}
+    NegExpr(Expr e) {this.e = e;}
 
-                        Boolean isAtom() {return (new Booelan(new Nat(this))).false();}
+    Boolean isAtom() {return (new Booelan(new Nat(this))).false();}
 
-                        Expr eval() {return this.e.eval().neg();}
-                    }
+    Expr eval() {return this.e.eval().neg();}
+}
                 \end{minted}
-                \item \tx{IsZero}
+                \item \tp{IsZero}
 
-                Para evaluar esto, se modifica la clase \tx{Nat} agregando los
+                Para evaluar esto, se modifica la clase \tp{Nat} agregando los
                 siguientes método.
 
                 \begin{minted}[mathescape]{java}
-                    // algunas modificaciones para Booleanos
-                    class Boolean extends Object {
-                        ...
-                        /**
-                        * $p \lor q = False \iff p = q = False = Bool(0) = Bool(0+0)$
-                        */
-                        Boolean or(Boolean p) {return new Boolean(this.m.suma(p.m));}
+// algunas modificaciones para Booleanos
+class Boolean extends Object {
+    ...
+    /**
+    * $p \lor q = False \iff p = q = False = Bool(0) = Bool(0+0)$
+    */
+    Boolean or(Boolean p) {return new Boolean(this.m.suma(p.m));}
 
-                        /**
-                        * $p \land q = \neg(\neg p \lor \neg q)$
-                        */
-                        Boolean and(Boolean p) {return this.not().or(p.not()).not();}
-                    }
+    /**
+    * $p \land q = \neg(\neg p \lor \neg q)$
+    */
+    Boolean and(Boolean p) {return this.not().or(p.not()).not();}
+}
 
-                    // modificaciones para Nat
-                    class Nat extends Object {
-                        ...
-                        /**
-                        * $a = b \iff a \leq b \land b \leq a$
-                        */
-                        Nat eq(Nat n) {return this.leq(n).and(n.leq(this));}
-                        ...
-                    }
+// modificaciones para Nat
+class Nat extends Object {
+    ...
+    /**
+    * $a = b \iff a \leq b \land b \leq a$
+    */
+    Nat eq(Nat n) {return this.leq(n).and(n.leq(this));}
+    ...
+}
 
-                    // modificacioes para Int
-                    class Int extends Object {
-                        ...
-                        Booelan isZero(Int i) {return this.i.eq(this.d);}
-                        ...
-                    }
+// modificacioes para Int
+class Int extends Object {
+    ...
+    Booelan isZero(Int i) {return this.i.eq(this.d);}
+    ...
+}
                 \end{minted}
 
-                Y se usa este método para 
+                Y se usa este método para
 
                 \begin{minted}{java}
-                    class IsZero extends Expr {
-                        Expr e;
+class IsZero extends Expr {
+    Expr e;
 
-                        IsZero(Expr e) {super(); this.e = e;}
+    isZero(Expr e) {super(); this.e = e;}
 
-                        Boolean isAtom() {return (new Booelan(new Nat(this))).false();}
+    Boolean isAtom() {return (new Booelan(new Nat(this))).false();}
 
-                        Expr eval() {return new BoolExpr(e.eval().v.isZero());}
-                    }
+    Expr eval() {return new BoolExpr(e.eval().v.isZero());}
+}
                 \end{minted}
             \end{itemize}
 
             \item Dé ejemplos de instancias de estas dos clases.
 
             \begin{minted}{java}
-                // cero
-                Int ceroI = new Int(new Cero(this), new Cero(this));
+// cero
+Int ceroI = new Int(new Cero(this), new Cero(this));
 
-                // NegExpr
-                NegExpr ceroE = new NegExpr(ceroI);
+// NegExpr
+NegExpr ceroE = new NegExpr(ceroI);
 
-                // IsZero
-                IsZero isZE = new IsZero(ceroI);
+// IsZero
+IsZero isZE = new IsZero(ceroI);
             \end{minted}
 
-            \item ¿Cómo se modifican las subclases de \tx{Expr} definidas en
+            \item ¿Cómo se modifican las subclases de \tp{Expr} definidas en
             puntos anteriores?
 
-            Para manejar \tx{NegExpr}, definió la clase \tx{Int} y se remplazó
-            \tx{Nat} en \tx{NumExpr} por \tx{Int}.
+            Para manejar \tp{NegExpr}, definió la clase \tp{Int} y se remplazó
+            \tp{Nat} en \tp{NumExpr} por \tp{Int}.
 
-            Para definir \tx{IsZero}, sólo se modificaron las clases de 
-            \tx{Boolean}, \tx{Nat} y \tx{Int} agregando los métodos necesarios
-            para usar \tx{isZero} en \tx{Int}.
+            Para definir \tp{IsZero}, sólo se modificaron las clases de
+            \tp{Boolean}, \tp{Nat} y \tp{Int} agregando los métodos necesarios
+            para usar \tp{isZero} en \tp{Int}.
         \end{enumerate}
 
-        Puede suponer definida la clase \tx{Value} (escencialmente 
-        \tx{Nat + Bool}) cuyas instancias sean los valores del lenguaje.
+        Puede suponer definida la clase \tp{Value} (escencialmente
+        \tp{Nat + Bool}) cuyas instancias sean los valores del lenguaje.
 
         Además de otras clases primitivas con los métodos que requiera.
 
         También se puede usar la constantee de error en cualquier método.
 
-        \item \tb{Extra \pt{hasta 2}: Privacidad en \tx{Java Peso Pluma}}
+        \item \tb{Extra \pt{hasta 2}: Privacidad en \tp{Java Peso Pluma}}
 
-        \tx{Java} proporciona mecanismos para controlar el accesso. Un método o
-        atributo de una clase pueden declararse como \ti{público, protegido o 
-        privado}. En \tx{Java Peso Pluma} es posible agregar este mecanismo como
+        \tp{Java} proporciona mecanismos para controlar el accesso. Un método o
+        atributo de una clase pueden declararse como \ti{público, protegido o
+        privado}. En \tp{Java Peso Pluma} es posible agregar este mecanismo como
         sigue
 
         \begin{minted}[escapeinside=<>]{java}
-            C ::= class C extends C {<\tvec{p}\tvec{C}\tvec{f}>;K <\tvec{M}>} // declaración de clases
-            M ::= p C m (<\tvec{C} \tvec{x}>) {return e;} // declaración de métodos
-            p ::= public | protected | private // modificacor de privacidad
+C ::= class C extends C {<\tvec{p}\tvec{C}\tvec{f}>;K <\tvec{M}>} // declaración de clases
+M ::= p C m (<\tvec{C} \tvec{x}>) {return e;} // declaración de métodos
+p ::= public | protected | private // modificacor de privacidad
         \end{minted}
 
-        EL significado intuitivo de los modificadores de privacidad es el 
+        EL significado intuitivo de los modificadores de privacidad es el
         siguiente:
 
         \begin{itemize}
-            \item Si un método o atributo de una clase \tx{C} se declara 
-            \tx{public}, entonces se permite el acceso desde cualquier lugar.
+            \item Si un método o atributo de una clase \tp{C} se declara
+            \tp{public}, entonces se permite el acceso desde cualquier lugar.
 
-            \item Si un método o atributo de una clase \tx{C} se declara 
-            \tx{protected}, entonces se permite el acceso únicamente desde
-            métodos de \tx{C} y subclases de \tx{C}.
+            \item Si un método o atributo de una clase \tp{C} se declara
+            \tp{protected}, entonces se permite el acceso únicamente desde
+            métodos de \tp{C} y subclases de \tp{C}.
 
-            \item Si un método o atributo de una clase \tx{C} se declara 
-            \tx{private}, entonces se permite el acceso únicamente desde
-            métodos de \tx{C}.
+            \item Si un método o atributo de una clase \tp{C} se declara
+            \tp{private}, entonces se permite el acceso únicamente desde
+            métodos de \tp{C}.
         \end{itemize}
 
-        Extienda la semática estática para filtrar programas que contengan 
-        violaciones de privacidad de acuerdo a las reglas dadas arriba. 
-        Especifique claramente cuales reglas de tipado originales se eliminan o 
+        Extienda la semática estática para filtrar programas que contengan
+        violaciones de privacidad de acuerdo a las reglas dadas arriba.
+        Especifique claramente cuales reglas de tipado originales se eliminan o
         se sustituyen por nuevas y cuáles se mantienen.
 
-        \ti{Sugerencia:} Cuando se verifique si un método está bien formado en 
-        una clase \tx{C}, se debe verificar si la expresión en el cuerpo del 
-        método no se reifere a métodos o atributos en otra clase \tx{D} que sean
-        privados o protegidos si \tx{C $\not \leq$ D}. Podría necesitarse el 
-        paso de algo más en el contexto \tx{$\Gamma$} en el juicio de tipado 
+        \ti{Sugerencia:} Cuando se verifique si un método está bien formado en
+        una clase \tp{C}, se debe verificar si la expresión en el cuerpo del
+        método no se reifere a métodos o atributos en otra clase \tp{D} que sean
+        privados o protegidos si \tp{C $\not \leq$ D}. Podría necesitarse el
+        paso de algo más en el contexto \tp{$\Gamma$} en el juicio de tipado
         para expresiones.
 
     \end{enumerate}
